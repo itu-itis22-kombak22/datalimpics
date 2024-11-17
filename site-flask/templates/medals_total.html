@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medals Total</title>
+</head>
+<body>
+    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
+    <h1>Medals Total</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Country</th>
+                <th>Gold Medals</th>
+                <th>Silver Medals</th>
+                <th>Bronze Medals</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medal in medals_total %}
+            <tr>
+                <td>{{ medal['rank'] }}</td>
+                <td>{{ medal['country_name'] }}</td>
+                <td>{{ medal['gold_medal'] }}</td>
+                <td>{{ medal['silver_medal'] }}</td>
+                <td>{{ medal['bronze_medal'] }}</td>
+                <td>{{ medal['total'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

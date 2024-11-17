@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Officials</title>
+</head>
+<body>
+    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
+    <h1>Technical Officials</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Short Name</th>
+                <th>Gender</th>
+                <th>Birth Date</th>
+                <th>Country</th>
+                <th>Function</th>
+                <th>Discipline</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for official in technical_officials %}
+            <tr>
+                <td>{{ official['name'] }}</td>
+                <td>{{ official['short_name'] }}</td>
+                <td>{{ official['gender'] }}</td>
+                <td>{{ official['birth_date'] }}</td>
+                <td>{{ official['country'] }}</td>
+                <td>{{ official['function'] }}</td>
+                <td>{{ official['discipline_name'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+

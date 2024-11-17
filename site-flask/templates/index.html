@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <title>Home - Datalimpics</title>
 </head>
 <body>
     <h1>Welcome to Datalimpics Flask App</h1>
-    <p>This is the index page.</p>
+    <p>Select a category to explore:</p>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('disciplinesPage') }}">Disciplines</a></li>
+            <li><a href="{{ url_for('technicalOfficialsPage') }}">Technical Officials</a></li>
+            <li><a href="{{ url_for('medalsTotalPage') }}">Medals Total</a></li>
+            <li><a href="{{ url_for('countriesPage') }}">Countries</a></li>
+        </ul>
+    </nav>
 </body>
 </html>

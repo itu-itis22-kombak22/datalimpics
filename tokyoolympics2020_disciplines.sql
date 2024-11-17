@@ -36,7 +36,7 @@ CREATE TABLE `disciplines` (
 
 LOCK TABLES `disciplines` WRITE;
 /*!40000 ALTER TABLE `disciplines` DISABLE KEYS */;
-INSERT INTO `disciplines` VALUES (32,''),(45,'3x3 Basketball'),(22,'Archery'),(2,'Artistic Gymnastics'),(26,'Artistic Swimming'),(12,'Athletics'),(24,'Badminton'),(10,'Baseball/Softball'),(4,'Basketball'),(30,'Beach Volleyball'),(21,'Boxing'),(38,'Canoe Slalom'),(14,'Canoe Sprint'),(46,'Cycling BMX Freestyle'),(25,'Cycling BMX Racing'),(44,'Cycling Mountain Bike'),(1,'Cycling Road'),(40,'Cycling Track'),(28,'Diving'),(31,'Equestrian'),(23,'Fencing'),(16,'Football'),(41,'Golf'),(5,'Handball'),(34,'Hockey'),(11,'Judo'),(7,'Karate'),(36,'Marathon Swimming'),(43,'Modern Pentathlon'),(9,'Rhythmic Gymnastics'),(3,'Rowing'),(27,'Rugby Sevens'),(18,'Sailing'),(15,'Shooting'),(42,'Skateboarding'),(47,'Sport Climbing'),(13,'Surfing'),(6,'Swimming'),(17,'Table Tennis'),(20,'Taekwondo'),(39,'Tennis'),(35,'Trampoline Gymnastics'),(37,'Triathlon'),(29,'Volleyball'),(33,'Water Polo'),(19,'Weightlifting'),(8,'Wrestling');
+INSERT INTO `disciplines` VALUES (32,'100 metres'),(45,'3x3 Basketball'),(22,'Archery'),(2,'Artistic Gymnastics'),(26,'Artistic Swimming'),(12,'Athletics'),(24,'Badminton'),(10,'Baseball/Softball'),(4,'Basketball'),(30,'Beach Volleyball'),(21,'Boxing'),(38,'Canoe Slalom'),(14,'Canoe Sprint'),(46,'Cycling BMX Freestyle'),(25,'Cycling BMX Racing'),(44,'Cycling Mountain Bike'),(1,'Cycling Road'),(40,'Cycling Track'),(28,'Diving'),(31,'Equestrian'),(23,'Fencing'),(16,'Football'),(41,'Golf'),(5,'Handball'),(34,'Hockey'),(11,'Judo'),(7,'Karate'),(36,'Marathon Swimming'),(43,'Modern Pentathlon'),(9,'Rhythmic Gymnastics'),(3,'Rowing'),(27,'Rugby Sevens'),(18,'Sailing'),(15,'Shooting'),(42,'Skateboarding'),(47,'Sport Climbing'),(13,'Surfing'),(6,'Swimming'),(17,'Table Tennis'),(20,'Taekwondo'),(39,'Tennis'),(35,'Trampoline Gymnastics'),(37,'Triathlon'),(29,'Volleyball'),(33,'Water Polo'),(19,'Weightlifting'),(8,'Wrestling');
 /*!40000 ALTER TABLE `disciplines` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-31 21:47:07
+-- Dump completed on 2024-11-18  0:56:22
