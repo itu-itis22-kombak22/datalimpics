@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coaches List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Coaches</h1>
+    <a href="{{ url_for('add_coach') }}">Add a New Coach</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Short Name</th>
+                <th>Gender</th>
+                <th>Birth Date</th>
+                <th>Country Code</th>
+                <th>Discipline</th>
+                <th>Function</th>
+                <th>Event</th>
+                <th>URL</th>
+                <th>Discipline ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coach in coaches %}
+            <tr>
+                <td>{{ coach['name'] }}</td>
+                <td>{{ coach['short_name'] }}</td>
+                <td>{{ coach['gender'] }}</td>
+                <td>{{ coach['birth_date'] }}</td>
+                <td>{{ coach['country_code'] }}</td>
+                <td>{{ coach['discipline'] }}</td>
+                <td>{{ coach['function'] }}</td>
+                <td>{{ coach['event'] }}</td>
+                <td><a href="{{ coach['url'] }}" target="_blank">{{ coach['url'] }}</a></td>
+                <td>{{ coach['discipline_id'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
