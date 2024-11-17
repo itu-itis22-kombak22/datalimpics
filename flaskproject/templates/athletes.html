@@ -1,0 +1,78 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletes Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Athletes Table</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Short Name</th>
+                <th>Gender</th>
+                <th>Birth Date</th>
+                <th>Birth Place</th>
+                <th>Birth Country</th>
+                <th>Country</th>
+                <th>Country Code</th>
+                <th>Discipline Code</th>
+                <th>Residence Place</th>
+                <th>Residence Country</th>
+                <th>Height (m/ft)</th>
+                <th>URL</th>
+                <th>Athlete ID</th>
+                <th>Discipline ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for athlete in athletes %}
+            <tr>
+                <td>{{ athlete['name'] }}</td>
+                <td>{{ athlete['short_name'] }}</td>
+                <td>{{ athlete['gender'] }}</td>
+                <td>{{ athlete['birth_date'] }}</td>
+                <td>{{ athlete['birth_place'] }}</td>
+                <td>{{ athlete['birth_country'] }}</td>
+                <td>{{ athlete['country'] }}</td>
+                <td>{{ athlete['country_code'] }}</td>
+                <td>{{ athlete['discipline_code'] }}</td>
+                <td>{{ athlete['residence_place'] }}</td>
+                <td>{{ athlete['residence_country'] }}</td>
+                <td>{{ athlete['height_m/ft'] }}</td>
+                <td><a href="{{ athlete['url'] }}" target="_blank">Profile</a></td>
+                <td>{{ athlete['athlete_id'] }}</td>
+                <td>{{ athlete['discipline_id'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
