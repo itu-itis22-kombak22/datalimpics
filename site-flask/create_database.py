@@ -1,9 +1,7 @@
 import sqlite3
-
 def init_sqlite_db():
     conn = sqlite3.connect('database.db')
     print("Opened database successfully")
-
     conn.execute('DROP TABLE IF EXISTS medals_total')
     conn.execute('''
         CREATE TABLE medals_total (
@@ -28,6 +26,7 @@ def init_sqlite_db():
         )
     ''')
     print("countries table created successfully")
+    conn.close()
     # Only drop and create new tables
 
     conn.execute('DROP TABLE IF EXISTS disciplines')
