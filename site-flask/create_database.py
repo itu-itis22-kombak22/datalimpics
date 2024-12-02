@@ -26,7 +26,7 @@ def init_sqlite_db():
         )
     ''')
     print("countries table created successfully")
-    conn.close()
+    
     # Only drop and create new tables
 
     conn.execute('DROP TABLE IF EXISTS disciplines')
@@ -57,4 +57,70 @@ def init_sqlite_db():
     ''')
     print("technical_officials table created successfully")
 
+    conn.execute('DROP TABLE IF EXISTS athletes')
+    # Create the athletes table
+    conn.execute('''
+        CREATE TABLE athletes (
+            name TEXT,
+            short_name TEXT,
+            gender TEXT,
+            birth_date TEXT,
+            birth_country TEXT,
+            country TEXT,
+            country_code VARCHAR(10) DEFAULT NULL,
+            discipline_code TEXT,
+            height_m_ft TEXT,
+            athlete_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            discipline_id INTEGER DEFAULT NULL,
+            FOREIGN KEY (country_code) REFERENCES countries (country_code),
+            FOREIGN KEY (discipline_id) REFERENCES disciplines (discipline_id)
+        )
+    ''')
+    print("athletes table created successfully")
+
+    conn.execute('DROP TABLE IF EXISTS coaches')
+    # Create the coaches table
+    conn.execute('''
+        CREATE TABLE coaches (
+            name TEXT,
+            short_name TEXT,
+            gender TEXT,
+            birth_date TEXT,
+            country_code VARCHAR(10) DEFAULT NULL,
+            discipline VARCHAR(50) DEFAULT NULL,
+            function TEXT,
+            event TEXT,
+            discipline_id INTEGER DEFAULT NULL,
+            coach_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            FOREIGN KEY (country_code) REFERENCES countries (country_code),
+            FOREIGN KEY (discipline_id) REFERENCES disciplines (discipline_id)
+        )
+    ''')
+    print("coaches table created successfully")
+
+    conn.execute('DROP TABLE IF EXISTS medals')
+    # Create the medals table
+    conn.execute('''
+        CREATE TABLE medals (
+            medal_type TEXT,
+            medal_code INTEGER DEFAULT NULL,
+            medal_date TEXT,
+            athlete_short_name VARCHAR(100) DEFAULT NULL,
+            athlete_name TEXT,
+            athlete_sex TEXT,
+            country_code VARCHAR(10) DEFAULT NULL,
+            discipline_code TEXT,
+            event TEXT,
+            country TEXT,
+            discipline VARCHAR(50) DEFAULT NULL,
+            athlete_id INTEGER DEFAULT NULL,
+            medal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            FOREIGN KEY (athlete_id) REFERENCES athletes (athlete_id),
+            FOREIGN KEY (country_code) REFERENCES countries (country_code)
+        )
+    ''')
+    print("medals table created successfully")
+
     conn.close()
+
+
