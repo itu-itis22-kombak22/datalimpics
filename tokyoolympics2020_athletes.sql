@@ -31,7 +31,7 @@ CREATE TABLE `athletes` (
   `country` text,
   `country_code` varchar(10) DEFAULT NULL,
   `discipline_code` text,
-  `height_m/ft` text,
+  `height_mft` text,
   `athlete_id` int NOT NULL AUTO_INCREMENT,
   `discipline_id` int DEFAULT NULL,
   PRIMARY KEY (`athlete_id`),

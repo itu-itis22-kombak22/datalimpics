@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Athletes</title>
+</head>
+<body>
+    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
+    <h1>Athletes</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Short Name</th>
+                <th>Gender</th>
+                <th>Birth Date</th>
+                <th>Birth Country</th>
+                <th>Country</th>
+                <th>Country Code</th>
+                <th>Discipline Code</th>
+                <th>Height</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for athlete in athletes %}
+            <tr>
+                <td>{{ athlete.name }}</td>
+                <td>{{ athlete.short_name }}</td>
+                <td>{{ athlete.gender }}</td>
+                <td>{{ athlete.birth_date }}</td>
+                <td>{{ athlete.birth_country or 'N/A' }}</td>
+                <td>{{ athlete.country or 'N/A' }}</td>
+                <td>{{ athlete.country_code or 'N/A' }}</td>
+                <td>{{ athlete.discipline_code or 'N/A' }}</td>
+                <td>{{ athlete.height_mft or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

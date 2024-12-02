@@ -69,7 +69,7 @@ def init_sqlite_db():
             country TEXT,
             country_code VARCHAR(10) DEFAULT NULL,
             discipline_code TEXT,
-            height_m_ft TEXT,
+            height_mft TEXT,
             athlete_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             discipline_id INTEGER DEFAULT NULL,
             FOREIGN KEY (country_code) REFERENCES countries (country_code),

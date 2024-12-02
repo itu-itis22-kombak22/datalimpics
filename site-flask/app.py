@@ -75,6 +75,72 @@ def countriesPage():
     conn.close()
     return render_template('countries.html', countries=countries)
 
+@app.route("/athletes")
+def athletesPage():
+    """Renders a page displaying athletes with their country and discipline details."""
+    conn = get_db_connection()
+    athletes = conn.execute("""
+        SELECT 
+            a.name, 
+            a.short_name, 
+            a.gender, 
+            a.birth_date, 
+            a.birth_country, 
+            a.country,
+            a.country_code, 
+            a.discipline_code, 
+            a.height_mft
+        FROM athletes a
+        LEFT JOIN countries c ON a.country_code = c.country_code
+        LEFT JOIN disciplines d ON a.discipline_id = d.discipline_id
+    """).fetchall()
+    conn.close()
+    return render_template('athletes.html', athletes=athletes)
+
+@app.route("/coaches")
+def coachesPage():
+    """Renders a page displaying coaches with their country and discipline details."""
+    conn = get_db_connection()
+    coaches = conn.execute("""
+        SELECT 
+            co.name, 
+            co.short_name, 
+            co.gender, 
+            co.birth_date, 
+            co.country_code, 
+            c.country_name AS country, 
+            co.function, 
+            co.discipline, 
+            co.event, 
+            d.discipline_name
+        FROM coaches co
+        LEFT JOIN countries c ON co.country_code = c.country_code
+        LEFT JOIN disciplines d ON co.discipline_id = d.discipline_id
+    """).fetchall()
+    conn.close()
+    return render_template('coaches.html', coaches=coaches)
+
+@app.route("/medals")
+def medalsPage():
+    """Renders a page displaying all medals."""
+    conn = get_db_connection()
+    medals = conn.execute("""
+        SELECT 
+            medal_type, 
+            medal_code, 
+            medal_date, 
+            athlete_name, 
+            athlete_sex, 
+            country_code, 
+            discipline_code, 
+            event, 
+            country, 
+            discipline
+        FROM medals
+    """).fetchall()
+    conn.close()
+    return render_template('medals.html', medals=medals)
+
 if __name__ == "__main__":
     app.run(debug=True)
 

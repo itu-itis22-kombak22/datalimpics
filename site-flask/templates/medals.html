@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medals</title>
+</head>
+<body>
+    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
+    <h1>Medals</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Medal Type</th>
+                <th>Medal Code</th>
+                <th>Medal Date</th>
+                <th>Athlete Name</th>
+                <th>Athlete Gender</th>
+                <th>Country Code</th>
+                <th>Discipline Code</th>
+                <th>Event</th>
+                <th>Country</th>
+                <th>Discipline</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for medal in medals %}
+            <tr>
+                <td>{{ medal.medal_type }}</td>
+                <td>{{ medal.medal_code }}</td>
+                <td>{{ medal.medal_date }}</td>
+                <td>{{ medal.athlete_name }}</td>
+                <td>{{ medal.athlete_sex }}</td>
+                <td>{{ medal.country_code }}</td>
+                <td>{{ medal.discipline_code }}</td>
+                <td>{{ medal.event }}</td>
+                <td>{{ medal.country }}</td>
+                <td>{{ medal.discipline }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
