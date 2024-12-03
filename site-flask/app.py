@@ -126,6 +126,7 @@ def athletesPage():
     athletes = conn.execute(paginated_query, params).fetchall()
 
     # Count total athletes for pagination
+    # 03.12.2024 - The counting function was causing an error because of a syntax in line "conn.execute" I fixed it. -Yigit Alp
     count_query = "SELECT COUNT(*) FROM athletes a"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
