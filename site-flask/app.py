@@ -126,9 +126,9 @@ def athletesPage():
     athletes = conn.execute(paginated_query, params).fetchall()
 
     # Count total athletes for pagination
-    count_query="SELECT COUNT(*) FROM athletes a"
+    count_query = "SELECT COUNT(*) FROM athletes a"
     if filters:
-        count_query += "WHERE" +"AND".join(filters)
+        count_query += " WHERE " + " AND ".join(filters)
     total_athletes = conn.execute(count_query, params[:-2]).fetchone()[0]
 
     conn.close()

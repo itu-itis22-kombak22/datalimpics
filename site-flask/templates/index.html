@@ -4,20 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Datalimpics</title>
+    <!-- Link the index.css file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
-    <h1>Welcome to Datalimpics Flask App</h1>
+    <div class="png-container">
+        <img src="{{ url_for('static', filename='images/olympics.png') }}" alt="Olympics Logo" class="olympics-logo">
+    </div>
+    <h1>Tokyo Olympics 2020 Statistics</h1>
+    <h2>Welcome to Datalimpics Flask App</h2>
     <p>Select a category to explore:</p>
     <nav>
-        <ul>
-            <li><a href="{{ url_for('disciplinesPage') }}">Disciplines</a></li>
-            <li><a href="{{ url_for('technicalOfficialsPage') }}">Technical Officials</a></li>
-            <li><a href="{{ url_for('medalsTotalPage') }}">Medals Total</a></li>
-            <li><a href="{{ url_for('countriesPage') }}">Countries</a></li>
-            <li><a href="{{ url_for('athletesPage') }}">Athletes</a></li>
-            <li><a href="{{ url_for('coachesPage') }}">Coaches</a></li>
-            <li><a href="{{ url_for('medalsPage') }}">Medals</a></li>
-        </ul>
+        <button onclick="location.href='{{ url_for('athletesPage') }}'">Athletes</button>
+        <button onclick="location.href='{{ url_for('disciplinesPage') }}'">Disciplines</button>
+        <button onclick="location.href='{{ url_for('technicalOfficialsPage') }}'">Technical Officials</button>
+        <button onclick="location.href='{{ url_for('medalsTotalPage') }}'">Medals Total</button>
+        <button onclick="location.href='{{ url_for('countriesPage') }}'">Countries</button>
+        <button onclick="location.href='{{ url_for('coachesPage') }}'">Coaches</button>
+        <button onclick="location.href='{{ url_for('medalsPage') }}'">Medals</button>
     </nav>
 </body>
 </html>
