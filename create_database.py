@@ -56,4 +56,24 @@ def init_sqlite_db():
     ''')
     print("athletes table created successfully")
 
+    conn.execute('''
+    DROP TABLE IF EXISTS coaches;
+
+    CREATE TABLE coaches (
+        name TEXT,
+        short_name TEXT,
+        gender TEXT,
+        birth_date TEXT,
+        country_code VARCHAR(10) DEFAULT NULL,
+        discipline VARCHAR(50) DEFAULT NULL,
+        function TEXT,
+        event TEXT,
+        discipline_id INTEGER DEFAULT NULL,
+        coach_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        FOREIGN KEY (country_code) REFERENCES countries (country_code),
+        FOREIGN KEY (discipline_id) REFERENCES disciplines (discipline_id)
+    );
+    ''')
+    print("coaches table created successfully")
+
     conn.close()
