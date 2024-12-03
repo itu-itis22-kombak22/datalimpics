@@ -3,6 +3,8 @@ from insert_datas import insert_db_datas
 from flask import Flask, render_template
 import sqlite3
 app = Flask(__name__)
+from flask import Flask, render_template, request
+import sqlite3
 
 # Initialize the database and insert data
 init_sqlite_db()
@@ -77,9 +79,18 @@ def countriesPage():
 
 @app.route("/athletes")
 def athletesPage():
-    """Renders a page displaying athletes with their country and discipline details."""
+    """Renders a paginated and filtered page displaying athletes."""
     conn = get_db_connection()
-    athletes = conn.execute("""
+
+    # Get query parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of athletes per page
+    offset = (page - 1) * per_page
+    filter_name = request.args.get('filter', '').strip()  # Get name filter, trim whitespace
+    gender = request.args.get('gender', '').strip()  # Get gender filter
+
+    # Base query
+    base_query = """
         SELECT 
             a.name, 
             a.short_name, 
@@ -91,11 +102,49 @@ def athletesPage():
             a.discipline_code, 
             a.height_mft
         FROM athletes a
-        LEFT JOIN countries c ON a.country_code = c.country_code
-        LEFT JOIN disciplines d ON a.discipline_id = d.discipline_id
-    """).fetchall()
+    """
+    filters = []
+    params = []
+
+    #filter
+    if filter_name:
+        filters.append("a.name LIKE ?")
+        params.append(f"%{filter_name}%")
+    if gender:
+        filters.append("a.gender = ?")
+        params.append(gender)
+
+    #filters into query
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    #pagination from my old work code
+    paginated_query = base_query + "LIMIT ? OFFSET?"
+    params.extend([per_page, offset])
+
+    # Fetch athletes data
+    athletes = conn.execute(paginated_query, params).fetchall()
+
+    # Count total athletes for pagination
+    count_query="SELECT COUNT(*) FROM athletes a"
+    if filters:
+        count_query += "WHERE" +"AND".join(filters)
+    total_athletes = conn.execute(count_query, params[:-2]).fetchone()[0]
+
     conn.close()
-    return render_template('athletes.html', athletes=athletes)
+
+    # Calculate total pages
+    total_pages =(total_athletes + per_page- 1)//per_page
+
+    return render_template(
+        'athletes.html',
+        athletes=athletes,
+        current_page=page,
+        total_pages=total_pages,
+        current_filter=filter_name,
+        current_gender=gender
+    )
+
 
 @app.route("/coaches")
 def coachesPage():

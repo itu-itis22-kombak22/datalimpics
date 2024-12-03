@@ -4,39 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Athletes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
-    <h1>Athletes</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Short Name</th>
-                <th>Gender</th>
-                <th>Birth Date</th>
-                <th>Birth Country</th>
-                <th>Country</th>
-                <th>Country Code</th>
-                <th>Discipline Code</th>
-                <th>Height</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for athlete in athletes %}
-            <tr>
-                <td>{{ athlete.name }}</td>
-                <td>{{ athlete.short_name }}</td>
-                <td>{{ athlete.gender }}</td>
-                <td>{{ athlete.birth_date }}</td>
-                <td>{{ athlete.birth_country or 'N/A' }}</td>
-                <td>{{ athlete.country or 'N/A' }}</td>
-                <td>{{ athlete.country_code or 'N/A' }}</td>
-                <td>{{ athlete.discipline_code or 'N/A' }}</td>
-                <td>{{ athlete.height_mft or 'N/A' }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="container mt-4">
+        <button class="btn btn-secondary mb-3" onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
+        <h1 class="mb-4">Athletes</h1>
+
+        <!--filter by Name-->
+        <form method="get" action="" class="mb-3">
+            <label for="name-filter" class="form-label">Filter by Name:</label>
+            <input type="text" id="name-filter" name="filter" class="form-control" placeholder="Enter a name or part of a name" value="{{ current_filter }}">
+            <input type="hidden" name="gender" value="{{ current_gender }}">
+            <button type="submit" class="btn btn-primary mt-2">Filter</button>
+        </form>
+
+        <!--filter gender -->
+        <div class="mb-3">
+            <span class="me-2">Filter by Gender:</span>
+            <a href="?gender=Male&filter={{ current_filter }}" class="btn btn-outline-primary btn-sm {% if current_gender == 'Male' %}active{% endif %}">Male</a>
+            <a href="?gender=Female&filter={{ current_filter }}" class="btn btn-outline-primary btn-sm {% if current_gender == 'Female' %}active{% endif %}">Female</a>
+            <a href="?filter={{ current_filter }}" class="btn btn-outline-secondary btn-sm {% if not current_gender %}active{% endif %}">All</a>
+        </div>
+
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Short Name</th>
+                    <th>Gender</th>
+                    <th>Birth Date</th>
+                    <th>Birth Country</th>
+                    <th>Country</th>
+                    <th>Country Code</th>
+                    <th>Discipline Code</th>
+                    <th>Height</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for athlete in athletes %}
+                <tr>
+                    <td>{{ athlete.name }}</td>
+                    <td>{{ athlete.short_name }}</td>
+                    <td>{{ athlete.gender }}</td>
+                    <td>{{ athlete.birth_date }}</td>
+                    <td>{{ athlete.birth_country or 'N/A' }}</td>
+                    <td>{{ athlete.country or 'N/A' }}</td>
+                    <td>{{ athlete.country_code or 'N/A' }}</td>
+                    <td>{{ athlete.discipline_code or 'N/A' }}</td>
+                    <td>{{ athlete.height_mft or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!--üpagination-->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if current_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ current_page - 1 }}&filter={{ current_filter }}&gender={{ current_gender }}">Previous</a>
+                </li>
+                {% endif %}
+
+                <!--page selector -->
+                <li class="page-item">
+                    <form method="get" action="" class="d-flex align-items-center">
+                        <input type="hidden" name="filter" value="{{ current_filter }}">
+                        <input type="hidden" name="gender" value="{{ current_gender }}">
+                        <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+                        <button type="submit" class="btn btn-primary">Go</button>
+                    </form>
+                </li>
+
+                {% if current_page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ current_page + 1 }}&filter={{ current_filter }}&gender={{ current_gender }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
