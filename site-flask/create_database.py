@@ -1,6 +1,4 @@
 import sqlite3
-
-
 def init_sqlite_db():
     conn = sqlite3.connect('database.db')
     print("Opened database successfully")
@@ -28,7 +26,7 @@ def init_sqlite_db():
         )
     ''')
     print("countries table created successfully")
-
+    
     # Only drop and create new tables
 
     conn.execute('DROP TABLE IF EXISTS disciplines')
@@ -103,27 +101,26 @@ def init_sqlite_db():
     conn.execute('DROP TABLE IF EXISTS medals')
     # Create the medals table
     conn.execute('''
-        CREATE TABLE `medals` (
-          `medal_type` text,
-          `medal_code` int DEFAULT NULL,
-          `medal_date` text,
-          `athlete_short_name` varchar(100) DEFAULT NULL,
-          `athlete_name` text,
-          `athlete_sex` text,
-          `country_code` varchar(10) DEFAULT NULL,
-          `discipline_code` text,
-          `event` text,
-          `country` text,
-          `discipline` varchar(50) DEFAULT NULL,
-          `athlete_id` int DEFAULT NULL,
-          `medal_id` int NOT NULL AUTO_INCREMENT,
-          PRIMARY KEY (`medal_id`),
-          KEY `fk_athlete_medal` (`athlete_id`),
-          KEY `fk_medal_country` (`country_code`),
-          CONSTRAINT `fk_athlete_medal` FOREIGN KEY (`athlete_id`) REFERENCES `athletes` (`athlete_id`),
-          CONSTRAINT `fk_medal_country` FOREIGN KEY (`country_code`) REFERENCES `countries` (`country_code`)
-);
+        CREATE TABLE medals (
+            medal_type TEXT,
+            medal_code INTEGER DEFAULT NULL,
+            medal_date TEXT,
+            athlete_short_name VARCHAR(100) DEFAULT NULL,
+            athlete_name TEXT,
+            athlete_sex TEXT,
+            country_code VARCHAR(10) DEFAULT NULL,
+            discipline_code TEXT,
+            event TEXT,
+            country TEXT,
+            discipline VARCHAR(50) DEFAULT NULL,
+            athlete_id INTEGER DEFAULT NULL,
+            medal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            FOREIGN KEY (athlete_id) REFERENCES athletes (athlete_id),
+            FOREIGN KEY (country_code) REFERENCES countries (country_code)
+        )
     ''')
     print("medals table created successfully")
 
     conn.close()
+
+
