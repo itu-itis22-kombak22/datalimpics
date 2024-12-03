@@ -34,4 +34,26 @@ def init_sqlite_db():
     ''')
     print("technical_officials table created successfully")
 
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS athletes (
+        name TEXT,
+        short_name TEXT,
+        gender TEXT,
+        birth_date TEXT,
+        birth_country TEXT,
+        country TEXT,
+        country_code VARCHAR(10) DEFAULT NULL,
+        discipline_code TEXT,
+        height_mft TEXT,
+        athlete_id INTEGER NOT NULL AUTO_INCREMENT,
+        discipline_id INTEGER DEFAULT NULL,
+        PRIMARY KEY (athlete_id),
+        KEY fk_athlete_country (country_code),
+        KEY fk_athletes_disciplines (discipline_id),
+        CONSTRAINT fk_athlete_country FOREIGN KEY (country_code) REFERENCES countries (country_code),
+        CONSTRAINT fk_athletes_disciplines FOREIGN KEY (discipline_id) REFERENCES disciplines (discipline_id)
+    )
+    ''')
+    print("athletes table created successfully")
+
     conn.close()
