@@ -10,7 +10,6 @@ import sqlite3
 init_sqlite_db()
 insert_db_datas()
 
-
 def get_db_connection():
     """Establish a connection to the database."""
     conn = sqlite3.connect('database.db')
