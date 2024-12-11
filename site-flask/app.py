@@ -23,11 +23,33 @@ def indexPage():
 
 @app.route("/disciplines")
 def disciplinesPage():
-    """Renders a page displaying all disciplines."""
+    """Renders a paginated page displaying disciplines."""
     conn = get_db_connection()
-    disciplines = conn.execute("SELECT * FROM disciplines").fetchall()
+
+    # Get query parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of disciplines per page
+    offset = (page - 1) * per_page
+
+    # Base query with pagination
+    paginated_query = "SELECT * FROM disciplines LIMIT ? OFFSET ?"
+    disciplines = conn.execute(paginated_query, (per_page, offset)).fetchall()
+
+    # Count total disciplines for pagination
+    count_query = "SELECT COUNT(*) FROM disciplines"
+    total_disciplines = conn.execute(count_query).fetchone()[0]
+
     conn.close()
-    return render_template('disciplines.html', disciplines=disciplines)
+
+    # Calculate total pages
+    total_pages = (total_disciplines + per_page - 1) // per_page
+
+    return render_template(
+        'disciplines.html',
+        disciplines=disciplines,
+        current_page=page,
+        total_pages=total_pages,
+    )
 
 @app.route("/technical_officials")
 def technicalOfficialsPage():
