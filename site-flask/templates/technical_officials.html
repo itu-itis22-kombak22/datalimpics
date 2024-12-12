@@ -4,119 +4,349 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Technical Officials</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <style>
-        /* Global Styles */
-body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-            color: #000000;
-            font-size: 2.5em;
-        }
-
-        button {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            background-color: #6c757d;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #333;
-        }
-
-        table {
-            width: 90%;
-            margin: 0 auto 20px auto;
-            border-collapse: collapse;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        table th, table td {
-            text-align: left;
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-
-        table th {
-            background-color: #007BFF;
-            color: white;
-            text-transform: uppercase;
-            font-size: 0.9em;
-        }
-
-        table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        table tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        table td {
-            font-size: 0.95em;
-        }
-
-        @media (max-width: 768px) {
-            table, table th, table td {
-                font-size: 0.8em;
-            }
-
-            button {
-                font-size: 0.9em;
-            }
-
-            h1 {
-                font-size: 2em;
-            }
+        .action-buttons {
+            display: flex;
+            gap: 5px; /* Adds spacing between the buttons */
         }
     </style>
 </head>
 <body>
-    <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
-    <h1>Technical Officials</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Short Name</th>
-                <th>Gender</th>
-                <th>Birth Date</th>
-                <th>Country</th>
-                <th>Function</th>
-                <th>Discipline</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for official in technical_officials %}
-            <tr>
-                <td>{{ official['name'] }}</td>
-                <td>{{ official['short_name'] }}</td>
-                <td>{{ official['gender'] }}</td>
-                <td>{{ official['birth_date'] }}</td>
-                <td>{{ official['country'] }}</td>
-                <td>{{ official['function'] }}</td>
-                <td>{{ official['discipline_name'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalLabel">Action Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalMessage">
+                    <!-- Message will be injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('indexPage') }}">Datalimpics</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('indexPage') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Contact</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text">
+                        You're on <b>Technical Officials</b> page
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        <hr>
+        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('indexPage') }}">Home</a></li>
+                <li class="breadcrumb-item">Tables</li>
+                <li class="breadcrumb-item active" aria-current="page">Technical Officials</li>
+            </ol>
+        </nav>
+        <hr>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Technical Official</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editOfficialId" name="official_id">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editShortName" class="form-label">Short Name</label>
+                            <input type="text" class="form-control" id="editShortName" name="short_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editGender" class="form-label">Gender</label>
+                            <select class="form-select" id="editGender" name="gender" required>
+                                <option value="" disabled>Select gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editBirthDate" class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" id="editBirthDate" name="birth_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCountry" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="editCountry" name="country" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editFunction" class="form-label">Function</label>
+                            <input type="text" class="form-control" id="editFunction" name="function" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDisciplineId" class="form-label">Discipline ID</label>
+                            <input type="text" class="form-control" id="editDisciplineId" name="discipline_id" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container text-center">
+        <div class="row">
+            <!-- Technical Officials Table Section -->
+            <div class="col-sm-8">
+                <br>
+                <h4> Technical Officials Table </h4>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Short Name</th>
+                                <th>Gender</th>
+                                <th>Birth Date</th>
+                                <th>Country</th>
+                                <th>Function</th>
+                                <th>Discipline</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for official in technical_officials %}
+                            <tr>
+                                <td>{{ loop.index + (current_page - 1) * 10 }}</td>
+                                <td>{{ official['name'] }}</td>
+                                <td>{{ official['short_name'] }}</td>
+                                <td>{{ official['gender'] }}</td>
+                                <td>{{ official['birth_date'] }}</td>
+                                <td>{{ official['country'] }}</td>
+                                <td>{{ official['function'] }}</td>
+                                <td>{{ official['discipline_name'] }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-primary btn-sm edit-button" data-id="{{ official['official_id'] }}">Edit</button>
+                                        <form method="POST" action="/delete_technical_official/{{ official['official_id'] }}" style="display: inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item">
+                            <form method="get" action="" class="d-flex align-items-center">
+                                <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+                                <button type="submit" class="btn btn-primary">Go</button>
+                            </form>
+                        </li>
+
+                        {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Add and Search Sections -->
+            <div class="col-sm-4">
+                <br>
+                <!-- Add New Technical Official -->
+                <div class="card">
+                    <div class="card-header">
+                        Add New Technical Official
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/add_technical_official">
+                            <div class="mb-3">
+                                <label for="officialName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="officialName" name="name" required placeholder="Input name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialShortName" class="form-label">Short Name</label>
+                                <input type="text" class="form-control" id="officialShortName" name="short_name" required placeholder="Input short name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialGender" class="form-label">Gender</label>
+                                <select class="form-select" id="officialGender" name="gender" required>
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialBirthDate" class="form-label">Birth Date</label>
+                                <input type="date" class="form-control" id="officialBirthDate" name="birth_date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialCountry" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="officialCountry" name="country" required placeholder="Input country">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialFunction" class="form-label">Function</label>
+                                <input type="text" class="form-control" id="officialFunction" name="function" required placeholder="Input function">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialDiscipline" class="form-label">Discipline</label>
+                                <input type="text" class="form-control" id="officialDiscipline" name="discipline_id" required placeholder="Input discipline ID">
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Official</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Search Technical Official -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        Search Technical Official
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="{{ url_for('technicalOfficialsPage') }}" class="row g-3">
+                            <div class="col-auto">
+                                <input type="text" name="search" class="form-control" id="searchOfficial" placeholder="Type official's name">
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary mb-3">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    <script>
+        async function handleDelete(event, officialId) {
+            event.preventDefault();
+            try {
+                const response = await fetch(`/delete_technical_official/${officialId}`, {
+                    method: "POST",
+                });
+                const data = await response.json();
+                document.getElementById("modalMessage").textContent = data.message;
+                const modal = new bootstrap.Modal(document.getElementById("actionModal"));
+                modal.show();
+                if (response.ok) {
+                    setTimeout(() => location.reload(), 2000);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function handleAdd(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            try {
+                const response = await fetch("/add_technical_official", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                document.getElementById("modalMessage").textContent = data.message;
+                const modal = new bootstrap.Modal(document.getElementById("actionModal"));
+                modal.show();
+                if (response.ok) {
+                    setTimeout(() => location.reload(), 2000);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        document.querySelector("form[action='/add_technical_official']").addEventListener("submit", handleAdd);
+        document.querySelectorAll("form[action^='/delete_technical_official']").forEach((form) => {
+            form.addEventListener("submit", (event) => {
+                const officialId = form.action.split("/").pop();
+                handleDelete(event, officialId);
+            });
+        });
+    </script>
+    <script>
+        const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        const editForm = document.getElementById('editForm');
+
+        document.querySelectorAll('.edit-button').forEach(button => {
+            button.addEventListener('click', async event => {
+                const officialId = button.getAttribute('data-id');
+                try {
+                    const response = await fetch(`/get_technical_official/${officialId}`);
+                    const official = await response.json();
+                    document.getElementById('editOfficialId').value = official.official_id;
+                    document.getElementById('editName').value = official.name;
+                    document.getElementById('editShortName').value = official.short_name;
+                    document.getElementById('editGender').value = official.gender;
+                    document.getElementById('editBirthDate').value = official.birth_date;
+                    document.getElementById('editCountry').value = official.country;
+                    document.getElementById('editFunction').value = official.function;
+                    document.getElementById('editDisciplineId').value = official.discipline_id;
+                    editModal.show();
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+        });
+
+        editForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const formData = new FormData(editForm);
+            try {
+                const response = await fetch('/update_technical_official', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+                alert(result.message);
+                editModal.hide();
+                location.reload();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    </script>
 </body>
 </html>
-

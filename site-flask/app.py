@@ -51,12 +51,21 @@ def disciplinesPage():
         total_pages=total_pages,
     )
 
-@app.route("/technical_officials")
+@app.route("/technical_officials", methods=["GET"])
 def technicalOfficialsPage():
-    """Renders a page displaying technical officials with additional details."""
+    """Renders a paginated and searchable page displaying technical officials."""
     conn = get_db_connection()
-    technical_officials = conn.execute("""
+
+    # Get query parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of officials per page
+    offset = (page - 1) * per_page
+    search = request.args.get('search', '').strip()  # Get search query
+
+    # Base query with optional search
+    base_query = """
         SELECT 
+            t.official_id, 
             t.name, 
             t.short_name, 
             t.gender, 
@@ -67,9 +76,144 @@ def technicalOfficialsPage():
         FROM technical_officials t
         JOIN countries c ON t.country = c.country_code
         JOIN disciplines d ON t.discipline_id = d.discipline_id
-    """).fetchall()
+    """
+    filters = []
+    params = []
+
+    # Add search filter
+    if search:
+        filters.append("t.name LIKE ?")
+        params.append(f"%{search}%")
+
+    # Add filters to query
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    # Add pagination
+    paginated_query = base_query + " LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    # Fetch officials data
+    technical_officials = conn.execute(paginated_query, params).fetchall()
+
+    # Count total officials for pagination
+    count_query = "SELECT COUNT(*) FROM technical_officials t"
+    if filters:
+        count_query += " WHERE " + " AND ".join(filters)
+    total_officials = conn.execute(count_query, params[:-2]).fetchone()[0]
+
     conn.close()
-    return render_template('technical_officials.html', technical_officials=technical_officials)
+
+    # Calculate total pages
+    total_pages = (total_officials + per_page - 1) // per_page
+
+    return render_template(
+        'technical_officials.html',
+        technical_officials=technical_officials,
+        current_page=page,
+        total_pages=total_pages,
+        search_query=search
+    )
+
+
+
+@app.route("/add_technical_official", methods=["POST"])
+def addTechnicalOfficial():
+    """Adds a new technical official."""
+    name = request.form.get("name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    country = request.form.get("country")
+    function = request.form.get("function")
+    discipline_id = request.form.get("discipline_id")
+
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO technical_officials (name, short_name, gender, birth_date, country, function, discipline_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (name, short_name, gender, birth_date, country, function, discipline_id))
+    conn.commit()
+    conn.close()
+    return {"message": "Technical official added successfully"}, 201
+
+@app.route("/get_technical_official/<int:official_id>", methods=["GET"])
+def getTechnicalOfficial(official_id):
+    """Fetch a specific technical official's data."""
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            official_id, name, short_name, gender, birth_date, country, function, discipline_id
+        FROM technical_officials
+        WHERE official_id = ?
+    """
+    official = conn.execute(query, (official_id,)).fetchone()
+    conn.close()
+    if official:
+        return dict(official)
+    else:
+        return {"error": "Technical official not found"}, 404
+
+@app.route("/update_technical_official", methods=["POST"])
+def updateTechnicalOfficial():
+    """Update a technical official's data."""
+    official_id = request.form.get("official_id")
+    name = request.form.get("name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    country = request.form.get("country")
+    function = request.form.get("function")
+    discipline_id = request.form.get("discipline_id")
+
+    conn = get_db_connection()
+    conn.execute("""
+        UPDATE technical_officials
+        SET name = ?, short_name = ?, gender = ?, birth_date = ?, country = ?, function = ?, discipline_id = ?
+        WHERE official_id = ?
+    """, (name, short_name, gender, birth_date, country, function, discipline_id, official_id))
+    conn.commit()
+    conn.close()
+    return {"message": "Technical official updated successfully"}, 200
+
+@app.route("/delete_technical_official/<int:official_id>", methods=["POST"])
+def deleteTechnicalOfficial(official_id):
+    """Deletes a technical official."""
+    conn = get_db_connection()
+    conn.execute("DELETE FROM technical_officials WHERE official_id = ?", (official_id,))
+    conn.commit()
+    conn.close()
+    return {"message": "Technical official deleted successfully"}, 200
+
+
+@app.route("/search_technical_officials", methods=["GET"])
+def searchTechnicalOfficials():
+    """Searches for technical officials."""
+    search_term = request.args.get("search_term", "").strip()
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            t.official_id,
+            t.name, 
+            t.short_name, 
+            t.gender, 
+            t.birth_date, 
+            c.country_name AS country, 
+            t.function, 
+            d.discipline_name
+        FROM technical_officials t
+        JOIN countries c ON t.country = c.country_code
+        JOIN disciplines d ON t.discipline_id = d.discipline_id
+        WHERE t.name LIKE ?
+    """
+    technical_officials = conn.execute(query, (f"%{search_term}%",)).fetchall()
+    conn.close()
+    return render_template(
+        'technical_officials.html',
+        technical_officials=technical_officials,
+        current_page=1,
+        total_pages=1,
+    )
 
 @app.route("/medals_total")
 def medalsTotalPage():
