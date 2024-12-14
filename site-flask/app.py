@@ -53,16 +53,32 @@ def disciplinesPage():
 
 @app.route("/technical_officials", methods=["GET"])
 def technicalOfficialsPage():
-    """Renders a paginated and searchable page displaying technical officials."""
+    """Renders a paginated, searchable, filterable, and sortable page displaying technical officials."""
     conn = get_db_connection()
 
     # Get query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of officials per page
     offset = (page - 1) * per_page
-    search = request.args.get('search', '').strip()  # Get search query
+    search = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'official_id')  # Default sorting by ID
+    order = request.args.get('order', 'asc')  # Default order ascending
 
-    # Base query with optional search
+    # Ensure valid sorting column and order
+    valid_columns = ['official_id', 'name', 'short_name', 'gender', 'birth_date', 'country', 'function', 'discipline_name']
+    if sort_by not in valid_columns:
+        sort_by = 'official_id'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+    # Filters
+    gender = request.args.get('gender', '').strip()
+    country = request.args.get('country', '').strip()
+    birth_date = request.args.get('birth_date', '').strip()
+    function = request.args.get('function', '').strip()
+    discipline = request.args.get('discipline', '').strip()
+
+    # Base query with filters
     base_query = """
         SELECT 
             t.official_id, 
@@ -80,23 +96,36 @@ def technicalOfficialsPage():
     filters = []
     params = []
 
-    # Add search filter
+    if gender:
+        filters.append("t.gender = ?")
+        params.append(gender)
+    if country:
+        filters.append("c.country_name LIKE ?")
+        params.append(f"%{country}%")
+    if birth_date:
+        filters.append("t.birth_date = ?")
+        params.append(birth_date)
+    if function:
+        filters.append("t.function LIKE ?")
+        params.append(f"%{function}%")
+    if discipline:
+        filters.append("d.discipline_name LIKE ?")
+        params.append(f"%{discipline}%")
     if search:
         filters.append("t.name LIKE ?")
         params.append(f"%{search}%")
 
-    # Add filters to query
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    # Add pagination
-    paginated_query = base_query + " LIMIT ? OFFSET ?"
+    # Add sorting and pagination
+    query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
-    # Fetch officials data
-    technical_officials = conn.execute(paginated_query, params).fetchall()
+    # Fetch data
+    technical_officials = conn.execute(query, params).fetchall()
 
-    # Count total officials for pagination
+    # Count total rows
     count_query = "SELECT COUNT(*) FROM technical_officials t"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
@@ -112,7 +141,14 @@ def technicalOfficialsPage():
         technical_officials=technical_officials,
         current_page=page,
         total_pages=total_pages,
-        search_query=search
+        search_query=search,
+        sort_by=sort_by,
+        order=order,
+        gender=gender,
+        country=country,
+        birth_date=birth_date,
+        function=function,
+        discipline=discipline
     )
 
 
