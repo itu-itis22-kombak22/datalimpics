@@ -21,23 +21,49 @@ def indexPage():
     """Renders the homepage."""
     return render_template('index.html')
 
-@app.route("/disciplines")
+@app.route("/disciplines", methods=["GET"])
 def disciplinesPage():
-    """Renders a paginated page displaying disciplines."""
+    """Renders a paginated, searchable, filterable, and sortable page displaying disciplines."""
     conn = get_db_connection()
 
     # Get query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of disciplines per page
     offset = (page - 1) * per_page
+    discipline_name = request.args.get('discipline_name', '').strip()  # Filter by discipline name
+    sort_by = request.args.get('sort_by', 'discipline_id')  # Default sorting by ID
+    order = request.args.get('order', 'asc')  # Default order ascending
 
-    # Base query with pagination
-    paginated_query = "SELECT * FROM disciplines LIMIT ? OFFSET ?"
-    disciplines = conn.execute(paginated_query, (per_page, offset)).fetchall()
+    # Ensure valid sorting column and order
+    valid_columns = ['discipline_id', 'discipline_name']
+    if sort_by not in valid_columns:
+        sort_by = 'discipline_id'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+    # Base query with optional filtering
+    base_query = "SELECT * FROM disciplines"
+    filters = []
+    params = []
+
+    if discipline_name:
+        filters.append("discipline_name LIKE ?")
+        params.append(f"%{discipline_name}%")
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    # Add sorting and pagination
+    query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    disciplines = conn.execute(query, params).fetchall()
 
     # Count total disciplines for pagination
     count_query = "SELECT COUNT(*) FROM disciplines"
-    total_disciplines = conn.execute(count_query).fetchone()[0]
+    if filters:
+        count_query += " WHERE " + " AND ".join(filters)
+    total_disciplines = conn.execute(count_query, params[:-2]).fetchone()[0]
 
     conn.close()
 
@@ -49,7 +75,62 @@ def disciplinesPage():
         disciplines=disciplines,
         current_page=page,
         total_pages=total_pages,
+        current_discipline_name=discipline_name,
+        sort_by=sort_by,
+        order=order
     )
+
+
+@app.route("/add_discipline", methods=["POST"])
+def addDiscipline():
+    """Add a new discipline."""
+    discipline_name = request.form.get("discipline_name")
+    conn = get_db_connection()
+    conn.execute("INSERT INTO disciplines (discipline_name) VALUES (?)", (discipline_name,))
+    conn.commit()
+    conn.close()
+    return {"message": "Discipline added successfully"}, 201
+
+
+@app.route("/get_discipline/<int:discipline_id>", methods=["GET"])
+def getDiscipline(discipline_id):
+    """Fetch a discipline's data by its ID."""
+    conn = get_db_connection()
+    query = "SELECT discipline_id, discipline_name FROM disciplines WHERE discipline_id = ?"
+    discipline = conn.execute(query, (discipline_id,)).fetchone()
+    conn.close()
+
+    if discipline:
+        return dict(discipline)
+    else:
+        return {"error": "Discipline not found"}, 404
+
+
+@app.route("/update_discipline", methods=["POST"])
+def updateDiscipline():
+    """Update a discipline's details."""
+    discipline_id = request.form.get("discipline_id")
+    discipline_name = request.form.get("discipline_name")
+
+    conn = get_db_connection()
+    conn.execute(
+        "UPDATE disciplines SET discipline_name = ? WHERE discipline_id = ?",
+        (discipline_name, discipline_id)
+    )
+    conn.commit()
+    conn.close()
+    return {"message": "Discipline updated successfully"}, 200
+
+
+@app.route("/delete_discipline/<int:discipline_id>", methods=["POST"])
+def deleteDiscipline(discipline_id):
+    """Deletes a discipline."""
+    conn = get_db_connection()
+    conn.execute("DELETE FROM disciplines WHERE discipline_id = ?", (discipline_id,))
+    conn.commit()
+    conn.close()
+
+    return {"message": "Discipline deleted successfully"}, 200
 
 @app.route("/technical_officials", methods=["GET"])
 def technicalOfficialsPage():
@@ -220,6 +301,28 @@ def deleteTechnicalOfficial(official_id):
     conn.commit()
     conn.close()
     return {"message": "Technical official deleted successfully"}, 200
+
+@app.route("/search_disciplines", methods=["GET"])
+def searchDisciplines():
+    """Searches for disciplines."""
+    search_term = request.args.get("search_term", "").strip()
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            discipline_id, 
+            discipline_name
+        FROM disciplines
+        WHERE discipline_name LIKE ?
+    """
+    disciplines = conn.execute(query, (f"%{search_term}%",)).fetchall()
+    conn.close()
+    return render_template(
+        'disciplines.html',
+        disciplines=disciplines,
+        current_page=1,
+        total_pages=1,
+        search_query=search_term
+    )
 
 
 @app.route("/search_technical_officials", methods=["GET"])

@@ -246,15 +246,15 @@
             <!-- Add and Search Sections -->
             <div class="col-sm-4">
                 <br>
-                <!-- Search Technical Official -->
+                <!-- Search Discipline -->
                 <div class="card">
                     <div class="card-header">
-                        Search Technical Official
+                        Search Discipline
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="{{ url_for('technicalOfficialsPage') }}" class="row g-3">
+                        <form method="GET" action="{{ url_for('disciplinesPage') }}" class="row g-3">
                             <div class="col-auto">
-                                <input type="text" name="search" class="form-control" id="searchOfficial" placeholder="Type official's name">
+                                <input type="text" name="search" class="form-control" id="searchDiscipline" placeholder="Type discipline name">
                             </div>
                             <div class="col-auto">
                                 <button type="submit" class="btn btn-primary mb-3">Search</button>
@@ -262,51 +262,22 @@
                         </form>
                     </div>
                 </div>
-                <!-- Add New Technical Official -->
+
+                <!-- Add New Discipline -->
                 <div class="card mt-4">
                     <div class="card-header">
-                        Add New Technical Official
+                        Add New Discipline
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="/add_technical_official">
+                        <form method="POST" action="/add_discipline">
                             <div class="mb-3">
-                                <label for="officialName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="officialName" name="name" required placeholder="Input name">
+                                <label for="disciplineName" class="form-label">Discipline Name</label>
+                                <input type="text" class="form-control" id="disciplineName" name="discipline_name" required placeholder="Enter discipline name">
                             </div>
-                            <div class="mb-3">
-                                <label for="officialShortName" class="form-label">Short Name</label>
-                                <input type="text" class="form-control" id="officialShortName" name="short_name" required placeholder="Input short name">
-                            </div>
-                            <div class="mb-3">
-                                <label for="officialGender" class="form-label">Gender</label>
-                                <select class="form-select" id="officialGender" name="gender" required>
-                                    <option value="" disabled selected>Select gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="officialBirthDate" class="form-label">Birth Date</label>
-                                <input type="date" class="form-control" id="officialBirthDate" name="birth_date" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="officialCountry" class="form-label">Country</label>
-                                <input type="text" class="form-control" id="officialCountry" name="country" required placeholder="Input country">
-                            </div>
-                            <div class="mb-3">
-                                <label for="officialFunction" class="form-label">Function</label>
-                                <input type="text" class="form-control" id="officialFunction" name="function" required placeholder="Input function">
-                            </div>
-                            <div class="mb-3">
-                                <label for="officialDiscipline" class="form-label">Discipline</label>
-                                <input type="text" class="form-control" id="officialDiscipline" name="discipline_id" required placeholder="Input discipline ID">
-                            </div>
-                            <button type="submit" class="btn btn-success">Add Official</button>
+                            <button type="submit" class="btn btn-success">Add Discipline</button>
                         </form>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
