@@ -6,7 +6,7 @@
     <title>Medals</title>
     <style>
         /* Global Styles */
-body {
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -86,11 +86,74 @@ body {
                 font-size: 2em;
             }
         }
+
+        .filter-form {
+            width: 90%;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+        }
+
+        .filter-form input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filter-form .btn {
+            background-color: #c713db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .filter-form .btn:hover {
+            background-color: #cf31e6;
+        }
     </style>
 </head>
 <body>
     <button onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
     <h1>Medals</h1>
+
+    <!-- Filter Form -->
+    <form method="get" action="" class="filter-form">
+        <div class="form-group">
+            <label for="medal-type">Filter by Medal Type:</label>
+            <input type="text" id="medal-type" name="medal_type" placeholder="Enter medal type" value="{{ medal_type_filter }}">
+        </div>
+        <div class="form-group">
+            <label for="athlete-name">Filter by Athlete Name:</label>
+            <input type="text" id="athlete-name" name="athlete_name" placeholder="Enter athlete name" value="{{ athlete_name_filter }}">
+        </div>
+        <div class="form-group">
+            <label for="country">Filter by Country:</label>
+            <input type="text" id="country" name="country" placeholder="Enter country" value="{{ country_filter }}">
+        </div>
+        <div class="form-group">
+            <label for="discipline">Filter by Discipline:</label>
+            <input type="text" id="discipline" name="discipline" placeholder="Enter discipline" value="{{ discipline_filter }}">
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn">Filter</button>
+        </div>
+    </form>
+
     <table>
         <thead>
             <tr>
