@@ -451,26 +451,34 @@ def athletesPage():
     )
 
 
-@app.route("/coaches")
+@app.route("/coaches", methods=["GET"])
 def coachesPage():
-    """Renders a paginated and filtered page displaying coaches."""
+    """Renders a paginated, searchable, filterable, and sortable page displaying coaches."""
     conn = get_db_connection()
 
     # Get query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of coaches per page
     offset = (page - 1) * per_page
+    search = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'name')  # Default sorting by name
+    order = request.args.get('order', 'asc')  # Default order ascending
+
+    # Ensure valid sorting column and order
+    valid_columns = ['name', 'gender', 'birth_date', 'country_code', 'function', 'discipline', 'discipline_name', 'event']
+    if sort_by not in valid_columns:
+        sort_by = 'name'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
 
     # Filters
-    filter_name = request.args.get('filter', '').strip()
     gender = request.args.get('gender', '').strip()
-    country = request.args.get('country', '').strip()
     birth_date = request.args.get('birth_date', '').strip()
-    country_code = request.args.get('country_code', '').strip()
+    country = request.args.get('country', '').strip()
     function = request.args.get('function', '').strip()
     discipline = request.args.get('discipline', '').strip()
-    event = request.args.get('event', '').strip()
     discipline_name = request.args.get('discipline_name', '').strip()
+    event = request.args.get('event', '').strip()
 
     # Base query
     base_query = """
@@ -493,56 +501,48 @@ def coachesPage():
     params = []
 
     # Add filters
-    if filter_name:
+    if search:
         filters.append("co.name LIKE ?")
-        params.append(f"%{filter_name}%")
+        params.append(f"%{search}%")
     if gender:
         filters.append("co.gender = ?")
         params.append(gender)
-    if country:
-        filters.append("c.country_name LIKE ?")
-        params.append(f"%{country}%")
     if birth_date:
         filters.append("co.birth_date = ?")
         params.append(birth_date)
-    if country_code:
-        filters.append("co.country_code = ?")
-        params.append(country_code)
+    if country:
+        filters.append("c.country_name LIKE ?")
+        params.append(f"%{country}%")
     if function:
         filters.append("co.function LIKE ?")
         params.append(f"%{function}%")
     if discipline:
         filters.append("co.discipline LIKE ?")
         params.append(f"%{discipline}%")
-    if event:
-        filters.append("co.event LIKE ?")
-        params.append(f"%{event}%")
     if discipline_name:
         filters.append("d.discipline_name LIKE ?")
         params.append(f"%{discipline_name}%")
+    if event:
+        filters.append("co.event LIKE ?")
+        params.append(f"%{event}%")
 
-    # Apply filters to query
+    # Apply filters
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    # Add pagination
-    paginated_query = base_query + " LIMIT ? OFFSET ?"
+    # Add sorting and pagination
+    query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
-    # Fetch coaches data
-    coaches = conn.execute(paginated_query, params).fetchall()
+    # Fetch data
+    coaches = conn.execute(query, params).fetchall()
 
-    # Count total coaches for pagination
-    count_query = """
-        SELECT COUNT(*)
-        FROM coaches co
-        LEFT JOIN countries c ON co.country_code = c.country_code
-        LEFT JOIN disciplines d ON co.discipline_id = d.discipline_id
-    """
+    # Count total rows
+    count_query = f"SELECT COUNT(*) FROM coaches co LEFT JOIN countries c ON co.country_code = c.country_code LEFT JOIN disciplines d ON co.discipline_id = d.discipline_id"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
-    total_coaches = conn.execute(count_query, params[:-2]).fetchone()[0]
 
+    total_coaches = conn.execute(count_query, params[:-2]).fetchone()[0]
     conn.close()
 
     # Calculate total pages
@@ -550,7 +550,7 @@ def coachesPage():
 
     # Gender dropdown options
     gender_options = {
-        "all_selected": "" if gender else "selected",
+        "all_selected": "" if not gender else "selected",
         "male_selected": "selected" if gender == "Male" else "",
         "female_selected": "selected" if gender == "Female" else "",
     }
@@ -560,17 +560,17 @@ def coachesPage():
         coaches=coaches,
         current_page=page,
         total_pages=total_pages,
-        current_filter=filter_name,
+        search_query=search,
+        sort_by=sort_by,
+        order=order,
         gender_options=gender_options,
-        current_country=country,
         current_birth_date=birth_date,
-        current_country_code=country_code,
+        current_country=country,
         current_function=function,
         current_discipline=discipline,
-        current_event=event,
-        current_discipline_name=discipline_name
+        current_discipline_name=discipline_name,
+        current_event=event
     )
-
 @app.route("/medals")
 def medalsPage():
     """Renders a page displaying all medals."""

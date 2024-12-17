@@ -4,112 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coaches</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        .action-buttons {
+            display: flex;
+            gap: 5px; /* Adds spacing between the buttons */
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <button class="btn btn-secondary mb-3" onclick="location.href='{{ url_for('indexPage') }}'">Back to Home</button>
-        <h1 class="mb-4">Coaches</h1>
-
-        <!-- Filter Form -->
-        <form method="get" action="" class="mb-3">
-            <div class="row">
-                <!-- Filter by Name -->
-                <div class="col-md-4">
-                    <label for="name-filter" class="form-label">Filter by Name:</label>
-                    <input type="text" id="name-filter" name="filter" class="form-control" placeholder="Enter a name" value="{{ current_filter }}">
+    <!-- Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalLabel">Action Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-
-                <!-- Filter by Birth Date -->
-                <div class="col-md-4">
-                    <label for="birthdate-filter" class="form-label">Filter by Birth Date:</label>
-                    <input type="text" id="birthdate-filter" name="birth_date" class="form-control datepicker" placeholder="Select a date" value="{{ current_birth_date }}">
+                <div class="modal-body" id="modalMessage">
+                    <!-- Message will be injected here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row mt-3">
-                <div class="col-md-4">
+    <div class="container">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('indexPage') }}">Datalimpics</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="{{ url_for('indexPage') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Contact</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text">
+                        You're on <b>Coaches</b> page
+                    </span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        <hr>
+        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('indexPage') }}">Home</a></li>
+                <li class="breadcrumb-item">Tables</li>
+                <li class="breadcrumb-item active" aria-current="page">Coaches</li>
+            </ol>
+        </nav>
+        <hr>
+    </div>
+
+    <div class="container text-center">
+        <!-- Filter Form -->
+        <form method="get" action="" class="mb-3">
+            <div class="row g-3 text-start">
+                <div class="col-md-4 col-lg-3">
+                    <label for="search" class="form-label">Search Name:</label>
+                    <input type="text" id="search" name="search" class="form-control" placeholder="Enter name" value="{{ search_query }}">
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="gender-filter" class="form-label">Filter by Gender:</label>
+                    <select id="gender-filter" name="gender" class="form-select">
+                        <option value="" {{ gender_options['all_selected'] }}>All</option>
+                        <option value="Male" {{ gender_options['male_selected'] }}>Male</option>
+                        <option value="Female" {{ gender_options['female_selected'] }}>Female</option>
+                    </select>
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="birthdate-filter" class="form-label">Filter by Birth Date:</label>
+                    <input type="date" id="birthdate-filter" name="birth_date" class="form-control" value="{{ current_birth_date }}">
+                </div>
+                <div class="col-md-4 col-lg-3">
                     <label for="country-filter" class="form-label">Filter by Country:</label>
                     <input type="text" id="country-filter" name="country" class="form-control" placeholder="Enter country" value="{{ current_country }}">
                 </div>
-                <div class="col-md-4">
-                    <label for="countrycode-filter" class="form-label">Filter by Country Code:</label>
-                    <input type="text" id="countrycode-filter" name="country_code" class="form-control" placeholder="Enter country code" value="{{ current_country_code }}">
-                </div>
-                <div class="col-md-4">
+            </div>
+            <div class="row g-3 mt-3 text-start">
+                <div class="col-md-4 col-lg-3">
                     <label for="function-filter" class="form-label">Filter by Function:</label>
                     <input type="text" id="function-filter" name="function" class="form-control" placeholder="Enter function" value="{{ current_function }}">
                 </div>
-            </div>
-
-            <div class="row mt-3">
-                <div class="col-md-4">
+                <div class="col-md-4 col-lg-3">
                     <label for="discipline-filter" class="form-label">Filter by Discipline:</label>
                     <input type="text" id="discipline-filter" name="discipline" class="form-control" placeholder="Enter discipline" value="{{ current_discipline }}">
                 </div>
-                <div class="col-md-4">
-                    <label for="event-filter" class="form-label">Filter by Event:</label>
-                    <input type="text" id="event-filter" name="event" class="form-control" placeholder="Enter event" value="{{ current_event }}">
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-4 col-lg-3">
                     <label for="discipline-name-filter" class="form-label">Filter by Discipline Name:</label>
                     <input type="text" id="discipline-name-filter" name="discipline_name" class="form-control" placeholder="Enter discipline name" value="{{ current_discipline_name }}">
                 </div>
+                <div class="col-md-4 col-lg-3">
+                    <label for="event-filter" class="form-label">Filter by Event:</label>
+                    <input type="text" id="event-filter" name="event" class="form-control" placeholder="Enter event" value="{{ current_event }}">
+                </div>
             </div>
-
-            <!-- Submit Button -->
-            <div class="mt-3 text-center">
+            <div class="mt-3 text-start">
                 <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ url_for('coachesPage') }}" class="btn btn-secondary">Clear Filters</a>
             </div>
         </form>
 
-        <!-- Table -->
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Short Name</th>
-                    <th>Gender</th>
-                    <th>Birth Date</th>
-                    <th>Country Code</th>
-                    <th>Country</th>
-                    <th>Function</th>
-                    <th>Discipline</th>
-                    <th>Event</th>
-                    <th>Discipline Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for coach in coaches %}
-                <tr>
-                    <td>{{ coach.name }}</td>
-                    <td>{{ coach.short_name }}</td>
-                    <td>{{ coach.gender }}</td>
-                    <td>{{ coach.birth_date }}</td>
-                    <td>{{ coach.country_code or 'N/A' }}</td>
-                    <td>{{ coach.country or 'N/A' }}</td>
-                    <td>{{ coach.function or 'N/A' }}</td>
-                    <td>{{ coach.discipline or 'N/A' }}</td>
-                    <td>{{ coach.event or 'N/A' }}</td>
-                    <td>{{ coach.discipline_name or 'N/A' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Coaches Table -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="?sort_by=name&order={{ 'asc' if sort_by != 'name' or order == 'desc' else 'desc' }}">Name</a>
+                        </th>
+                        <th>Short Name</th>
+                        <th>
+                            <a href="?sort_by=gender&order={{ 'asc' if sort_by != 'gender' or order == 'desc' else 'desc' }}">Gender</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=birth_date&order={{ 'asc' if sort_by != 'birth_date' or order == 'desc' else 'desc' }}">Birth Date</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=function&order={{ 'asc' if sort_by != 'function' or order == 'desc' else 'desc' }}">Function</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=discipline&order={{ 'asc' if sort_by != 'discipline' or order == 'desc' else 'desc' }}">Discipline</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=event&order={{ 'asc' if sort_by != 'event' or order == 'desc' else 'desc' }}">Event</a>
+                        </th>
+                        <th>
+                            <a href="?sort_by=discipline_name&order={{ 'asc' if sort_by != 'discipline_name' or order == 'desc' else 'desc' }}">Discipline Name</a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coach in coaches %}
+                    <tr>
+                        <td>{{ coach['name'] }}</td>
+                        <td>{{ coach['short_name'] }}</td>
+                        <td>{{ coach['gender'] }}</td>
+                        <td>{{ coach['birth_date'] }}</td>
+                        <td>{{ coach['country'] }}</td>
+                        <td>{{ coach['function'] }}</td>
+                        <td>{{ coach['discipline'] }}</td>
+                        <td>{{ coach['event'] }}</td>
+                        <td>{{ coach['discipline_name'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if current_page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
+                </li>
+                {% endif %}
+                <li class="page-item">
+                    <form method="get" action="" class="d-flex align-items-center">
+                        <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
+                        <button type="submit" class="btn btn-primary">Go</button>
+                    </form>
+                </li>
+                {% if current_page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-                todayHighlight: true
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
 </body>
 </html>
