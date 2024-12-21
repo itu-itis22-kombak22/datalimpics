@@ -354,6 +354,39 @@ def searchTechnicalOfficials():
         total_pages=1,
     )
 
+@app.route("/api/medals_data", methods=["GET"])
+def getMedalsData():
+    """Return medal statistics for the map."""
+    conn = get_db_connection()
+    medals_data = conn.execute("""
+        SELECT 
+            c.country_code AS iso_a3, -- Ensure this matches ISO_A3 codes
+            c.country_name,
+            m.gold_medal AS gold,
+            m.silver_medal AS silver,
+            m.bronze_medal AS bronze,
+            m.total
+        FROM medals_total m
+        JOIN countries c ON m.country_code = c.country_code
+        ORDER BY m.total DESC
+    """).fetchall()
+    conn.close()
+
+    # Format the data for the map
+    formatted_data = [
+        {
+            "country_code": row["iso_a3"],
+            "country_name": row["country_name"],
+            "gold": row["gold"],
+            "silver": row["silver"],
+            "bronze": row["bronze"],
+            "total": row["total"]
+        }
+        for row in medals_data
+    ]
+
+    return {"data": formatted_data}, 200
+
 @app.route("/medals_total")
 def medalsTotalPage():
     """Renders a page displaying medals total data with country names."""

@@ -6,6 +6,23 @@
     <title>Home - Datalimpics</title>
     <!-- Link the index.css file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        /* Add some custom styles for the map */
+        #worldMap {
+            height: 600px;
+            width: 100%; /* Make the map responsive */
+            max-width: 1200px; /* Limit the maximum width */
+            margin: 0 auto; /* Center the map on the page */
+            margin-top: 20px;
+                  background-color: #f5f5f5; /* Add a white background */
+  }
+  .leaflet-tile {
+      display: none; /* Hide tiles */
+
+        }
+    </style>
 </head>
 <body>
     <div class="png-container">
@@ -23,5 +40,84 @@
         <button onclick="location.href='{{ url_for('coachesPage') }}'">Coaches</button>
         <button onclick="location.href='{{ url_for('medalsPage') }}'">Medals</button>
     </nav>
+
+    <h2>Global Medal Statistics</h2>
+    <p>Explore the global distribution of medals. Click on a country to view its medal statistics.</p>
+    <!-- Map Container -->
+    <div id="worldMap"></div>
+
+    <!-- Leaflet JS for the map -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Initialize the map
+            const map = L.map("worldMap", {
+                worldCopyJump: false, // Prevent repeating maps
+                maxBounds: [[-90, -180], [90, 180]], // Restrict viewable area
+                maxBoundsViscosity: 1.0 // Restrict map dragging beyond bounds
+            }).setView([20, 0], 2); // Center the map
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 10,
+    minZoom: 2
+}).addTo(map);
+
+
+
+// Add this after initializing the map to hide the background:
+document.querySelectorAll('.leaflet-tile-pane')[0].style.filter = "opacity(0)";
+
+            // Fetch the medal data from the backend API
+            const response = await fetch("/api/medals_data");
+            const { data: medalsData } = await response.json();
+
+            // Fetch GeoJSON for the world map
+            const geoJSONData = await fetch("{{ url_for('static', filename='world-geojson.json') }}").then(res => res.json());
+
+            // Add the GeoJSON data to the map
+            L.geoJson(geoJSONData, {
+                style: feature => {
+                    const country = medalsData.find(
+                        item => item.country_code === feature.id // Adjust here if necessary
+                    );
+                    console.log(feature.properties.ISO_A3, country ? country.total : 'No data'); // Debugging
+                    return {
+                        fillColor: country ? getColor(country.total) : "#cccccc",
+                        weight: 1,
+                        opacity: 1,
+                        color: "white",
+                        fillOpacity: 0.7
+                    };
+                },
+                onEachFeature: (feature, layer) => {
+    const country = medalsData.find(
+    item => item.country_code === feature.id // Adjust here if necessary
+    );
+    if (country) {
+        layer.bindPopup(`
+            <strong>${country.country_name}</strong><br>
+            🥇 Gold: ${country.gold}<br>
+            🥈 Silver: ${country.silver}<br>
+            🥉 Bronze: ${country.bronze}<br>
+            🏅 Total: ${country.total}
+        `);
+    } else {
+        layer.bindPopup("No medals.");
+    }
+}
+            }).addTo(map);
+
+            // Function to calculate color based on the number of medals
+            function getColor(totalMedals) {
+                console.log('Total Medals:', totalMedals); // Debugging
+                return totalMedals > 20 ? "#800026" :
+                       totalMedals > 15 ? "#BD0026" :
+                       totalMedals > 10 ? "#E31A1C" :
+                       totalMedals > 5  ? "#FC4E2A" :
+                                          "#FFEDA0";
+            }
+        });
+    </script>
 </body>
 </html>
