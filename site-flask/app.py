@@ -521,24 +521,209 @@ def getMedalsData():
 
     return {"data": formatted_data}, 200
 
-@app.route("/medals_total")
+@app.route("/medals_total", methods=["GET"])
 def medalsTotalPage():
     """Renders a page displaying medals total data with country names."""
     conn = get_db_connection()
-    medals_total = conn.execute("""
-        SELECT 
-            m.rank, 
-            c.country_name, 
-            m.gold_medal, 
-            m.silver_medal, 
-            m.bronze_medal, 
-            m.total
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    offset = (page - 1) * per_page
+    search = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'rank')
+    order = request.args.get('order', 'asc')
+
+    valid_columns = ['rank', 'country_name', 'gold_medal', 'silver_medal', 'bronze_medal', 'total', 'country_code']
+    if sort_by not in valid_columns:
+        sort_by = 'rank'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+        
+    rank = request.args.get('rank', '').strip()
+    country_name = request.args.get('country_name', '').strip()
+    gold_medal = request.args.get('gold_medal', '').strip()
+    silver_medal = request.args.get('silver_medal', '').strip()
+    bronze_medal = request.args.get('bronze_medal', '').strip()
+    total_medal = request.args.get('total_medal', '').strip()
+    country_code = request.args.get('country_code', '').strip()
+
+    base_query = """
+        SELECT
+            m.rank,
+            c.country_name,
+            m.gold_medal,
+            m.silver_medal,
+            m.bronze_medal,
+            m.total,
+            m.country_code
         FROM medals_total m
         JOIN countries c ON m.country_code = c.country_code
-        ORDER BY m.rank
-    """).fetchall()
+    """
+    filters = []
+    params = []
+
+    if search:
+        filters.append("c.country_name LIKE ?")
+        params.append(f"%{search}%")
+    if rank:
+        filters.append("m.rank = ?")
+        params.append(rank)
+    if country_name:
+        filters.append("c.country_name LIKE ?")
+        params.append(f"%{country_name}%")
+    if gold_medal:
+        filters.append("m.gold_medal = ?")
+        params.append(gold_medal)
+    if silver_medal:
+        filters.append("m.silver_medal = ?")
+        params.append(silver_medal)
+    if bronze_medal:
+        filters.append("m.bronze_medal = ?")
+        params.append(bronze_medal)
+    if total_medal:
+        filters.append("m.total = ?")
+        params.append(total_medal)
+    if country_code:
+        filters.append("m.country_code = ?")
+        params.append(country_code)
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    medals_total = conn.execute(query, params).fetchall()
+
+    count_query = "SELECT COUNT(*) FROM medals_total m JOIN countries c ON m.country_code = c.country_code"
+    if filters:
+        count_query += " WHERE " + " AND ".join(filters)
+    total_medals = conn.execute(count_query, params[:-2]).fetchone()[0]
+
     conn.close()
-    return render_template('medals_total.html', medals_total=medals_total)
+
+    total_pages = (total_medals + per_page - 1) // per_page
+
+    return render_template(
+        'medals_total.html',
+        medals_total=medals_total,
+        current_page=page,
+        total_pages=total_pages,
+        search_query=search,
+        sort_by=sort_by,
+        order=order,
+        rank=rank,
+        country_name=country_name,
+        gold_medal=gold_medal,
+        silver_medal=silver_medal,
+        bronze_medal=bronze_medal,
+        total_medal=total_medal,
+        country_code=country_code
+    )
+
+
+
+@app.route("/add_medals_total", methods=["POST"])
+def addMedalsTotal():
+    """Adds a new entry to the medals_total table."""
+    rank = request.form.get("rank", type=int)
+    country_code = request.form.get("countryCode")
+    gold_medal = request.form.get("goldMedal", type=int)
+    silver_medal = request.form.get("silverMedal", type=int)
+    bronze_medal = request.form.get("bronzeMedal", type=int)
+    total = gold_medal + silver_medal + bronze_medal
+
+    conn = get_db_connection()
+
+    # Check if the country code exists
+    country_exists = conn.execute("SELECT 1 FROM countries WHERE country_code = ?", (country_code,)).fetchone()
+    if not country_exists:
+        conn.close()
+        return {"message": "Country code does not exist"}, 404
+    # Check if the medals total entry already exists
+    medals_total_exists = conn.execute("SELECT 1 FROM medals_total WHERE country_code = ?", (country_code,)).fetchone()
+    if medals_total_exists:
+        conn.close()
+        return {"message": "Medals total entry already exists for this country"}, 409
+
+    conn.execute(
+        """
+        INSERT INTO medals_total (rank, country_code, gold_medal, silver_medal, bronze_medal, total)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (rank, country_code, gold_medal, silver_medal, bronze_medal, total)
+    )
+    conn.commit()
+    conn.close()
+    return {"message": "Medals total added successfully"}, 201
+
+@app.route("/get_medals_total/<string:country_code>", methods=["GET"])
+def getMedalsTotal(country_code):
+    """Fetches a medals total entry by country code."""
+    conn = get_db_connection()
+    query = "SELECT * FROM medals_total WHERE country_code = ?"
+    medals_total = conn.execute(query, (country_code,)).fetchone()
+    conn.close()
+
+    if medals_total:
+        return dict(medals_total)
+    else:
+        return {"error": "Medals total entry not found"}, 404
+
+@app.route("/update_medals_total", methods=["POST"])
+def updateMedalsTotal():
+    """Updates an existing medals total entry."""
+    country_code = request.form.get("country_code", type=str)
+    rank = request.form.get("rank", type=int)
+    gold_medal = request.form.get("gold_medal", type=int)
+    silver_medal = request.form.get("silver_medal", type=int)
+    bronze_medal = request.form.get("bronze_medal", type=int)
+    total = gold_medal + silver_medal + bronze_medal
+
+    conn = get_db_connection()
+    conn.execute(
+        """
+        UPDATE medals_total
+        SET rank = ?, gold_medal = ?, silver_medal = ?, bronze_medal = ?, total = ?
+        WHERE country_code = ?
+        """,
+        (rank, gold_medal, silver_medal, bronze_medal, total, country_code)
+    )
+    conn.commit()
+    conn.close()
+    return {"message": "Medals total updated successfully"}, 200
+
+@app.route("/delete_medals_total/<string:country_code>", methods=["POST"])
+def deleteMedalsTotal(country_code):
+    """Deletes a medals total entry."""
+    conn = get_db_connection()
+    conn.execute("DELETE FROM medals_total WHERE country_code = ?", (country_code,))
+    conn.commit()
+    conn.close()
+    return {"message": "Medals total deleted successfully"}, 200
+
+@app.route("/search_medals_total", methods=["GET"])
+def searchMedalsTotal():
+    """Searches for medals total entries by country name."""
+    search_term = request.args.get("search_term", "").strip()
+    conn = get_db_connection()
+    query = """
+        SELECT m.*, c.country_name
+        FROM medals_total m
+        JOIN countries c ON m.country_code = c.country_code
+        WHERE c.country_name LIKE ?
+    """
+    medals_totals = conn.execute(query, (f"%{search_term}%",)).fetchall()
+    conn.close()
+
+    return render_template(
+        'medals_total.html',
+        medals_total=medals_totals,
+        current_page=1,
+        total_pages=1,
+        search_query=search_term
+    )
 
 @app.route("/athletes")
 def athletesPage():
