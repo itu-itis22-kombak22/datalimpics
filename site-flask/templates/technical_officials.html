@@ -223,12 +223,14 @@
                     <ul class="pagination justify-content-center">
                         {% if current_page > 1 %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
+                            <a class="page-link" href="?page={{ current_page - 1 }}&sort_by={{ sort_by }}&order={{ order }}">Previous</a>
                         </li>
                         {% endif %}
 
                         <li class="page-item">
                             <form method="get" action="" class="d-flex align-items-center">
+                                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                                <input type="hidden" name="order" value="{{ order }}">
                                 <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
                                 <button type="submit" class="btn btn-primary">Go</button>
                             </form>
@@ -236,7 +238,7 @@
 
                         {% if current_page < total_pages %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
+                            <a class="page-link" href="?page={{ current_page + 1 }}&sort_by={{ sort_by }}&order={{ order }}">Next</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -246,15 +248,15 @@
             <!-- Add and Search Sections -->
             <div class="col-sm-4">
                 <br>
-                <!-- Search Discipline -->
+                <!-- Search Technical Official -->
                 <div class="card">
                     <div class="card-header">
-                        Search Discipline
+                        Search Technical Official
                     </div>
                     <div class="card-body">
-                        <form method="GET" action="{{ url_for('disciplinesPage') }}" class="row g-3">
+                        <form method="GET" action="{{ url_for('searchTechnicalOfficials') }}" class="row g-3">
                             <div class="col-auto">
-                                <input type="text" name="search" class="form-control" id="searchDiscipline" placeholder="Type discipline name">
+                                <input type="text" name="search_term" class="form-control" id="searchTechnicalOfficial" placeholder="Type official's name">
                             </div>
                             <div class="col-auto">
                                 <button type="submit" class="btn btn-primary mb-3">Search</button>
@@ -263,18 +265,46 @@
                     </div>
                 </div>
 
-                <!-- Add New Discipline -->
+                <!-- Add New Technical Official -->
                 <div class="card mt-4">
                     <div class="card-header">
-                        Add New Discipline
+                        Add New Technical Official
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="/add_discipline">
+                        <form method="POST" action="/add_technical_official">
                             <div class="mb-3">
-                                <label for="disciplineName" class="form-label">Discipline Name</label>
-                                <input type="text" class="form-control" id="disciplineName" name="discipline_name" required placeholder="Enter discipline name">
+                                <label for="officialName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="officialName" name="name" required placeholder="Enter official's name">
                             </div>
-                            <button type="submit" class="btn btn-success">Add Discipline</button>
+                            <div class="mb-3">
+                                <label for="officialShortName" class="form-label">Short Name</label>
+                                <input type="text" class="form-control" id="officialShortName" name="short_name" required placeholder="Enter short name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialGender" class="form-label">Gender</label>
+                                <select class="form-select" id="officialGender" name="gender" required>
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialBirthDate" class="form-label">Birth Date</label>
+                                <input type="date" class="form-control" id="officialBirthDate" name="birth_date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialCountry" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="officialCountry" name="country" required placeholder="Enter country">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialFunction" class="form-label">Function</label>
+                                <input type="text" class="form-control" id="officialFunction" name="function" required placeholder="Enter function">
+                            </div>
+                            <div class="mb-3">
+                                <label for="officialDisciplineId" class="form-label">Discipline ID</label>
+                                <input type="text" class="form-control" id="officialDisciplineId" name="discipline_id" required placeholder="Enter discipline ID">
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Official</button>
                         </form>
                     </div>
                 </div>

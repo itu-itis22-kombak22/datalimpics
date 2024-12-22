@@ -142,24 +142,24 @@ def technicalOfficialsPage():
     per_page = 10  # Number of officials per page
     offset = (page - 1) * per_page
     search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'official_id')  # Default sorting by ID
+    sort_by = request.args.get('sort_by', 'official_id')  # Default sorting by official_id
     order = request.args.get('order', 'asc')  # Default order ascending
 
     # Ensure valid sorting column and order
     valid_columns = ['official_id', 'name', 'short_name', 'gender', 'birth_date', 'country', 'function', 'discipline_name']
     if sort_by not in valid_columns:
-        sort_by = 'official_id'
+        sort_by = 'name'
     if order not in ['asc', 'desc']:
         order = 'asc'
 
     # Filters
     gender = request.args.get('gender', '').strip()
-    country = request.args.get('country', '').strip()
     birth_date = request.args.get('birth_date', '').strip()
+    country = request.args.get('country', '').strip()
     function = request.args.get('function', '').strip()
     discipline = request.args.get('discipline', '').strip()
 
-    # Base query with filters
+    # Base query
     base_query = """
         SELECT 
             t.official_id, 
@@ -171,31 +171,33 @@ def technicalOfficialsPage():
             t.function, 
             d.discipline_name
         FROM technical_officials t
-        JOIN countries c ON t.country = c.country_code
-        JOIN disciplines d ON t.discipline_id = d.discipline_id
+        LEFT JOIN countries c ON t.country = c.country_code
+        LEFT JOIN disciplines d ON t.discipline_id = d.discipline_id
     """
     filters = []
     params = []
 
+    # Add filters
+    if search:
+        filters.append("t.name LIKE ?")
+        params.append(f"%{search}%")
     if gender:
         filters.append("t.gender = ?")
         params.append(gender)
-    if country:
-        filters.append("c.country_name LIKE ?")
-        params.append(f"%{country}%")
     if birth_date:
         filters.append("t.birth_date = ?")
         params.append(birth_date)
+    if country:
+        filters.append("c.country_name LIKE ?")
+        params.append(f"%{country}%")
     if function:
         filters.append("t.function LIKE ?")
         params.append(f"%{function}%")
     if discipline:
         filters.append("d.discipline_name LIKE ?")
         params.append(f"%{discipline}%")
-    if search:
-        filters.append("t.name LIKE ?")
-        params.append(f"%{search}%")
 
+    # Apply filters
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
@@ -207,7 +209,12 @@ def technicalOfficialsPage():
     technical_officials = conn.execute(query, params).fetchall()
 
     # Count total rows
-    count_query = "SELECT COUNT(*) FROM technical_officials t"
+    count_query = """
+        SELECT COUNT(*) 
+        FROM technical_officials t
+        LEFT JOIN countries c ON t.country = c.country_code
+        LEFT JOIN disciplines d ON t.discipline_id = d.discipline_id
+    """
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
     total_officials = conn.execute(count_query, params[:-2]).fetchone()[0]
@@ -226,8 +233,8 @@ def technicalOfficialsPage():
         sort_by=sort_by,
         order=order,
         gender=gender,
-        country=country,
         birth_date=birth_date,
+        country=country,
         function=function,
         discipline=discipline
     )

@@ -139,12 +139,14 @@
                     <ul class="pagination justify-content-center">
                         {% if current_page > 1 %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
+                            <a class="page-link" href="?page={{ current_page - 1 }}&sort_by={{ sort_by }}&order={{ order }}">Previous</a>
                         </li>
                         {% endif %}
 
                         <li class="page-item">
                             <form method="get" action="" class="d-flex align-items-center">
+                                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                                <input type="hidden" name="order" value="{{ order }}">
                                 <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
                                 <button type="submit" class="btn btn-primary">Go</button>
                             </form>
@@ -152,7 +154,7 @@
 
                         {% if current_page < total_pages %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
+                            <a class="page-link" href="?page={{ current_page + 1 }}&sort_by={{ sort_by }}&order={{ order }}">Next</a>
                         </li>
                         {% endif %}
                     </ul>
