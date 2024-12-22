@@ -21,6 +21,133 @@ def indexPage():
     """Renders the homepage."""
     return render_template('index.html')
 
+@app.route("/countries")
+def countriesPage():
+    """Renders a paginated, searchable, filterable, and sortable page displaying countries."""
+    conn = get_db_connection()
+
+    #query params
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    offset = (page - 1) * per_page
+    country_name = request.args.get('country_name', '').strip()
+    sort_by = request.args.get('sort_by', 'country_code')
+    order = request.args.get('order', 'asc')
+
+     # Ensure valid sorting column and order
+    valid_columns = ['country_code', 'country_name']
+    if sort_by not in valid_columns:
+        sort_by = 'country_code'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+    # Base query with optional filtering
+    base_query = "SELECT * FROM countries"
+    filters = []
+    params = []
+
+    if country_name:
+        filters.append("countr_name LIKE ?")
+        params.append(f"%{country_name}%")
+
+    if filters:
+        base_query += " WHERE " + " AND ".join(filters)
+
+    # Add sorting and pagination
+    query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    countries = conn.execute(query, params).fetchall()
+
+    # Count total country for pagination
+    count_query = "SELECT COUNT(*) FROM countries"
+    if filters:
+        count_query += " WHERE " + " AND ".join(filters)
+    total_countries = conn.execute(count_query, params[:-2]).fetchone()[0]
+
+    conn.close()
+
+    total_pages = (total_countries + per_page - 1) // per_page
+
+    return render_template(
+        'countries.html',
+        countries=countries,
+        current_page=page,
+        total_pages=total_pages,
+        current_country_name=country_name,
+        sort_by=sort_by,
+        order=order
+    )
+
+@app.route("/add_country", methods=["POST"])
+def addCountry():
+    """Add a new country."""
+    country_code = request.form.get("country_code")
+    country_name = request.form.get("country_name")
+    conn = get_db_connection()
+    conn.execute("INSERT INTO countries (country_code, country_name) VALUES (?, ?)", (country_code, country_name))
+    conn.commit()
+    conn.close()
+    return {"message": "Country added successfully"}, 201
+
+@app.route("/get_country/<string:country_code>", methods=["GET"])
+def getCountry(country_code):
+    """Fetch a country's data by its code."""
+    conn = get_db_connection()
+    query = "SELECT country_code, country_name FROM countries WHERE country_code = ?"
+    country = conn.execute(query, (country_code,)).fetchone()
+    conn.close()
+
+    if country:
+        return dict(country)
+    else:
+        return {"error": "Country not found"}, 404
+    
+@app.route("/update_country", methods=["POST"])
+def updateCountry():
+    """Update a country's details."""
+    country_code = request.form.get("country_code")
+    country_name = request.form.get("country_name")
+
+    conn = get_db_connection()
+    conn.execute("UPDATE countries SET country_name = ? WHERE country_code = ?", (country_name, country_code))
+    conn.commit()
+    conn.close()
+    return {"message": "Country updated successfully"}, 200
+
+@app.route("/delete_country/<string:country_code>", methods=["POST"])
+def deleteCountry(country_code):
+    """Deletes a country."""
+    conn = get_db_connection()
+    conn.execute("DELETE FROM countries WHERE country_code = ?", (country_code,))
+    conn.commit()
+    conn.close()
+    return {"message": "Country deleted successfully"}, 200
+
+@app.route("/search_countries", methods=["GET"])
+def searchCountries():
+    """Searches for countries."""
+    search_term = request.args.get("search_term", "").strip()
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            country_code, 
+            country_name
+        FROM countries
+        WHERE country_name LIKE ?
+    """
+    countries = conn.execute(query, (f"%{search_term}%",)).fetchall()
+    conn.close()
+    return render_template(
+        'countries.html',
+        countries=countries,
+        current_page=1,
+        total_pages=1,
+        search_query=search_term
+    )
+
+
+
 @app.route("/disciplines", methods=["GET"])
 def disciplinesPage():
     """Renders a paginated, searchable, filterable, and sortable page displaying disciplines."""
@@ -412,14 +539,6 @@ def medalsTotalPage():
     """).fetchall()
     conn.close()
     return render_template('medals_total.html', medals_total=medals_total)
-
-@app.route("/countries")
-def countriesPage():
-    """Renders a page displaying all countries."""
-    conn = get_db_connection()
-    countries = conn.execute("SELECT * FROM countries").fetchall()
-    conn.close()
-    return render_template('countries.html', countries=countries)
 
 @app.route("/athletes")
 def athletesPage():
