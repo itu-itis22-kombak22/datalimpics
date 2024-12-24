@@ -5,192 +5,336 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coaches</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <style>
-        .action-buttons {
-            display: flex;
-            gap: 5px; /* Adds spacing between the buttons */
-        }
-    </style>
 </head>
 <body>
-    <!-- Modal -->
-    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="actionModalLabel">Action Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="modalMessage">
-                    <!-- Message will be injected here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<!-- Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionModalLabel">Action Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                <!-- Message will be injected here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="container">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url_for('indexPage') }}">Datalimpics</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarText">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{{ url_for('indexPage') }}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Contact</a>
-                        </li>
-                    </ul>
-                    <span class="navbar-text">
-                        You're on <b>Coaches</b> page
-                    </span>
-                </div>
+<div class="container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('indexPage') }}">Datalimpics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('indexPage') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+                <span class="navbar-text">
+                    You're on <b>Coaches</b> page
+                </span>
             </div>
-        </nav>
+        </div>
+    </nav>
+</div>
+
+<div class="container">
+    <hr>
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('indexPage') }}">Home</a></li>
+            <li class="breadcrumb-item">Tables</li>
+            <li class="breadcrumb-item active" aria-current="page">Coaches</li>
+        </ol>
+    </nav>
+    <hr>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Coach</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="editCoachId" name="coach_id">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editGender" class="form-label">Gender</label>
+                        <select class="form-select" id="editGender" name="gender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editBirthDate" class="form-label">Birth Date</label>
+                        <input type="date" class="form-control" id="editBirthDate" name="birth_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCountry" class="form-label">Country Code</label>
+                        <input type="text" class="form-control" id="editCountry" name="country_code" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFunction" class="form-label">Function</label>
+                        <input type="text" class="form-control" id="editFunction" name="function">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDiscipline" class="form-label">Discipline</label>
+                        <input type="text" class="form-control" id="editDiscipline" name="discipline">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEvent" class="form-label">Event</label>
+                        <input type="text" class="form-control" id="editEvent" name="event">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="container">
-        <hr>
-        <nav style="--bs-breadcrumb-divider: '>'" aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('indexPage') }}">Home</a></li>
-                <li class="breadcrumb-item">Tables</li>
-                <li class="breadcrumb-item active" aria-current="page">Coaches</li>
-            </ol>
-        </nav>
-        <hr>
-    </div>
+<div class="container text-center">
 
-    <div class="container text-center">
-        <!-- Filter Form -->
-        <form method="get" action="" class="mb-3">
-            <div class="row g-3 text-start">
-                <div class="col-md-4 col-lg-3">
-                    <label for="search" class="form-label">Search Name:</label>
-                    <input type="text" id="search" name="search" class="form-control" placeholder="Enter name" value="{{ search_query }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="gender-filter" class="form-label">Filter by Gender:</label>
-                    <select id="gender-filter" name="gender" class="form-select">
-                        <option value="" {{ gender_options['all_selected'] }}>All</option>
-                        <option value="Male" {{ gender_options['male_selected'] }}>Male</option>
-                        <option value="Female" {{ gender_options['female_selected'] }}>Female</option>
-                    </select>
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="birthdate-filter" class="form-label">Filter by Birth Date:</label>
-                    <input type="date" id="birthdate-filter" name="birth_date" class="form-control" value="{{ current_birth_date }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="country-filter" class="form-label">Filter by Country:</label>
-                    <input type="text" id="country-filter" name="country" class="form-control" placeholder="Enter country" value="{{ current_country }}">
-                </div>
+    <!-- Filter Form -->
+    <form method="get" action="" class="mb-3">
+        <div class="row g-3 text-start">
+            <div class="col-md-4 col-lg-3">
+                <label for="coach-filter" class="form-label">Search Name:</label>
+                <input type="text" id="coach-filter" name="search" class="form-control" placeholder="Enter name" value="{{ search_query }}">
             </div>
-            <div class="row g-3 mt-3 text-start">
-                <div class="col-md-4 col-lg-3">
-                    <label for="function-filter" class="form-label">Filter by Function:</label>
-                    <input type="text" id="function-filter" name="function" class="form-control" placeholder="Enter function" value="{{ current_function }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="discipline-filter" class="form-label">Filter by Discipline:</label>
-                    <input type="text" id="discipline-filter" name="discipline" class="form-control" placeholder="Enter discipline" value="{{ current_discipline }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="discipline-name-filter" class="form-label">Filter by Discipline Name:</label>
-                    <input type="text" id="discipline-name-filter" name="discipline_name" class="form-control" placeholder="Enter discipline name" value="{{ current_discipline_name }}">
-                </div>
-                <div class="col-md-4 col-lg-3">
-                    <label for="event-filter" class="form-label">Filter by Event:</label>
-                    <input type="text" id="event-filter" name="event" class="form-control" placeholder="Enter event" value="{{ current_event }}">
-                </div>
-            </div>
-            <div class="mt-3 text-start">
-                <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ url_for('coachesPage') }}" class="btn btn-secondary">Clear Filters</a>
-            </div>
-        </form>
+        </div>
+        <div class="mt-3 text-start">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('coachesPage') }}" class="btn btn-secondary">Clear Filters</a>
+        </div>
+    </form>
 
-        <!-- Coaches Table -->
-        <div class="table-responsive">
+    <div class="row">
+        <!-- Coaches Table Section -->
+        <div class="col-sm-8">
+            <h4> Coaches Table </h4>
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>
-                            <a href="?sort_by=name&order={{ 'asc' if sort_by != 'name' or order == 'desc' else 'desc' }}">Name</a>
-                        </th>
-                        <th>Short Name</th>
-                        <th>
-                            <a href="?sort_by=gender&order={{ 'asc' if sort_by != 'gender' or order == 'desc' else 'desc' }}">Gender</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=birth_date&order={{ 'asc' if sort_by != 'birth_date' or order == 'desc' else 'desc' }}">Birth Date</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=function&order={{ 'asc' if sort_by != 'function' or order == 'desc' else 'desc' }}">Function</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=discipline&order={{ 'asc' if sort_by != 'discipline' or order == 'desc' else 'desc' }}">Discipline</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=event&order={{ 'asc' if sort_by != 'event' or order == 'desc' else 'desc' }}">Event</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=discipline_name&order={{ 'asc' if sort_by != 'discipline_name' or order == 'desc' else 'desc' }}">Discipline Name</a>
-                        </th>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Birth Date</th>
+                        <th>Country</th>
+                        <th>Function</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for coach in coaches %}
                     <tr>
+                        <td>{{ loop.index + (current_page - 1) * 10 }}</td>
                         <td>{{ coach['name'] }}</td>
-                        <td>{{ coach['short_name'] }}</td>
                         <td>{{ coach['gender'] }}</td>
                         <td>{{ coach['birth_date'] }}</td>
-                        <td>{{ coach['country'] }}</td>
+                        <td>{{ coach['country_code'] }}</td>
                         <td>{{ coach['function'] }}</td>
-                        <td>{{ coach['discipline'] }}</td>
-                        <td>{{ coach['event'] }}</td>
-                        <td>{{ coach['discipline_name'] }}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm edit-button" data-id="{{ coach['coach_id'] }}">Edit</button>
+                            <form method="POST" action="/delete_coach/{{ coach['coach_id'] }}" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm delete-button" data-id="{{ coach['coach_id'] }}">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page - 1 }}&search={{ search_query }}&sort_by={{ sort_by }}&order={{ order }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item d-flex align-items-center">
+                        <input type="number" class="form-control me-2" min="1" max="{{ total_pages }}" id="jumpPage" value="{{ current_page }}" style="width: 70px;">
+                        <button class="btn btn-primary btn-sm" id="jumpButton">Go</button>
+                    </li>
+                    <li class="page-item disabled">
+                        <a class="page-link">/ {{ total_pages }}</a>
+                    </li>
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page + 1 }}&search={{ search_query }}&sort_by={{ sort_by }}&order={{ order }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
 
-        <!-- Pagination Controls -->
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                {% if current_page > 1 %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ current_page - 1 }}">Previous</a>
-                </li>
-                {% endif %}
-                <li class="page-item">
-                    <form method="get" action="" class="d-flex align-items-center">
-                        <input type="number" name="page" class="form-control mx-2" style="width: 80px;" min="1" max="{{ total_pages }}" value="{{ current_page }}">
-                        <button type="submit" class="btn btn-primary">Go</button>
+        <!-- Add and Search Section -->
+        <div class="col-sm-4">
+            <!-- Add New Coach -->
+            <div class="card">
+                <div class="card-header">
+                    Add New Coach
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/add_coach">
+                        <div class="mb-3">
+                            <label for="coachName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="coachName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachGender" class="form-label">Gender</label>
+                            <select class="form-select" id="coachGender" name="gender" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachBirthDate" class="form-label">Birth Date</label>
+                            <input type="date" class="form-control" id="coachBirthDate" name="birth_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachCountry" class="form-label">Country Code</label>
+                            <input type="text" class="form-control" id="coachCountry" name="country_code" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachFunction" class="form-label">Function</label>
+                            <input type="text" class="form-control" id="coachFunction" name="function">
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachDiscipline" class="form-label">Discipline</label>
+                            <input type="text" class="form-control" id="coachDiscipline" name="discipline">
+                        </div>
+                        <div class="mb-3">
+                            <label for="coachEvent" class="form-label">Event</label>
+                            <input type="text" class="form-control" id="coachEvent" name="event">
+                        </div>
+                        <button type="submit" class="btn btn-success">Add Coach</button>
                     </form>
-                </li>
-                {% if current_page < total_pages %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ current_page + 1 }}">Next</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    const editForm = document.getElementById('editForm');
 
+    // Attach event listener to each edit button
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', async () => {
+            const coachId = button.dataset.id;
+
+            try {
+                const response = await fetch(`/get_coach/${coachId}`);
+                const coach = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('editCoachId').value = coach.coach_id;
+                    document.getElementById('editName').value = coach.name;
+                    document.getElementById('editGender').value = coach.gender;
+                    document.getElementById('editBirthDate').value = coach.birth_date;
+                    document.getElementById('editCountry').value = coach.country_code;
+                    document.getElementById('editFunction').value = coach.function;
+                    document.getElementById('editDiscipline').value = coach.discipline;
+                    document.getElementById('editEvent').value = coach.event;
+
+                    editModal.show();
+                } else {
+                    alert(coach.error);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    });
+
+    // Delete Button Functionality
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const coachId = button.dataset.id;
+
+            if (confirm("Are you sure you want to delete this coach?")) {
+                try {
+                    const response = await fetch(`/delete_coach/${coachId}`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        alert("Coach deleted successfully!");
+                        location.reload();
+                    } else {
+                        const error = await response.json();
+                        alert(error.message);
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        });
+    });
+
+    // Edit Form Submission
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch('/update_coach', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    // Pagination Jump Functionality
+    const jumpButton = document.getElementById("jumpButton");
+    const jumpPage = document.getElementById("jumpPage");
+
+    jumpButton.addEventListener("click", () => {
+        const page = jumpPage.value;
+        if (page >= 1 && page <= {{ total_pages }}) {
+            window.location.href = `?page=${page}&search={{ search_query }}&sort_by={{ sort_by }}&order={{ order }}`;
+        } else {
+            alert("Invalid page number");
+        }
+    });
+</script>
 </body>
 </html>

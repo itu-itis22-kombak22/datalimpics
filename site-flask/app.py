@@ -795,9 +795,9 @@ def athletesPage():
     )
 
 
+
 @app.route("/coaches", methods=["GET"])
 def coachesPage():
-    """Renders a paginated, searchable, filterable, and sortable page displaying coaches."""
     conn = get_db_connection()
 
     # Get query parameters
@@ -805,72 +805,25 @@ def coachesPage():
     per_page = 10  # Number of coaches per page
     offset = (page - 1) * per_page
     search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'name')  # Default sorting by name
+    sort_by = request.args.get('sort_by', 'coach_id')  # Default sorting by ID
     order = request.args.get('order', 'asc')  # Default order ascending
 
     # Ensure valid sorting column and order
-    valid_columns = ['name', 'gender', 'birth_date', 'country_code', 'function', 'discipline', 'discipline_name', 'event']
+    valid_columns = ['coach_id', 'name', 'short_name', 'gender', 'birth_date', 'country_code', 'function', 'discipline', 'event']
     if sort_by not in valid_columns:
-        sort_by = 'name'
+        sort_by = 'coach_id'
     if order not in ['asc', 'desc']:
         order = 'asc'
 
-    # Filters
-    gender = request.args.get('gender', '').strip()
-    birth_date = request.args.get('birth_date', '').strip()
-    country = request.args.get('country', '').strip()
-    function = request.args.get('function', '').strip()
-    discipline = request.args.get('discipline', '').strip()
-    discipline_name = request.args.get('discipline_name', '').strip()
-    event = request.args.get('event', '').strip()
-
-    # Base query
-    base_query = """
-        SELECT 
-            co.name, 
-            co.short_name, 
-            co.gender, 
-            co.birth_date, 
-            co.country_code, 
-            c.country_name AS country, 
-            co.function, 
-            co.discipline, 
-            co.event, 
-            d.discipline_name
-        FROM coaches co
-        LEFT JOIN countries c ON co.country_code = c.country_code
-        LEFT JOIN disciplines d ON co.discipline_id = d.discipline_id
-    """
+    # Base query with optional filtering
+    base_query = "SELECT * FROM coaches"
     filters = []
     params = []
 
-    # Add filters
     if search:
-        filters.append("co.name LIKE ?")
+        filters.append("name LIKE ?")
         params.append(f"%{search}%")
-    if gender:
-        filters.append("co.gender = ?")
-        params.append(gender)
-    if birth_date:
-        filters.append("co.birth_date = ?")
-        params.append(birth_date)
-    if country:
-        filters.append("c.country_name LIKE ?")
-        params.append(f"%{country}%")
-    if function:
-        filters.append("co.function LIKE ?")
-        params.append(f"%{function}%")
-    if discipline:
-        filters.append("co.discipline LIKE ?")
-        params.append(f"%{discipline}%")
-    if discipline_name:
-        filters.append("d.discipline_name LIKE ?")
-        params.append(f"%{discipline_name}%")
-    if event:
-        filters.append("co.event LIKE ?")
-        params.append(f"%{event}%")
 
-    # Apply filters
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
@@ -878,26 +831,18 @@ def coachesPage():
     query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
-    # Fetch data
     coaches = conn.execute(query, params).fetchall()
 
-    # Count total rows
-    count_query = f"SELECT COUNT(*) FROM coaches co LEFT JOIN countries c ON co.country_code = c.country_code LEFT JOIN disciplines d ON co.discipline_id = d.discipline_id"
+    # Count total coaches for pagination
+    count_query = "SELECT COUNT(*) FROM coaches"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
-
     total_coaches = conn.execute(count_query, params[:-2]).fetchone()[0]
+
     conn.close()
 
     # Calculate total pages
     total_pages = (total_coaches + per_page - 1) // per_page
-
-    # Gender dropdown options
-    gender_options = {
-        "all_selected": "" if not gender else "selected",
-        "male_selected": "selected" if gender == "Male" else "",
-        "female_selected": "selected" if gender == "Female" else "",
-    }
 
     return render_template(
         'coaches.html',
@@ -906,15 +851,97 @@ def coachesPage():
         total_pages=total_pages,
         search_query=search,
         sort_by=sort_by,
-        order=order,
-        gender_options=gender_options,
-        current_birth_date=birth_date,
-        current_country=country,
-        current_function=function,
-        current_discipline=discipline,
-        current_discipline_name=discipline_name,
-        current_event=event
+        order=order
     )
+
+
+@app.route("/add_coach", methods=["POST"])
+def addCoach():
+    name = request.form.get("name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    country_code = request.form.get("country_code")
+    function = request.form.get("function")
+    discipline = request.form.get("discipline")
+    event = request.form.get("event")
+
+    if name and gender and birth_date and country_code:
+        conn = get_db_connection()
+        conn.execute("""
+            INSERT INTO coaches (name, short_name, gender, birth_date, country_code, function, discipline, event)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (name, short_name, gender, birth_date, country_code, function, discipline, event))
+        conn.commit()
+        conn.close()
+        return {"message": "Coach added successfully"}, 201
+    else:
+        return {"error": "Required fields are missing"}, 400
+
+
+@app.route("/get_coach/<int:coach_id>", methods=["GET"])
+def getCoach(coach_id):
+    conn = get_db_connection()
+    query = "SELECT * FROM coaches WHERE coach_id = ?"
+    coach = conn.execute(query, (coach_id,)).fetchone()
+    conn.close()
+
+    if coach:
+        return dict(coach), 200
+    else:
+        return {"error": "Coach not found"}, 404
+
+
+@app.route("/update_coach", methods=["POST"])
+def updateCoach():
+    coach_id = request.form.get("coach_id")
+    name = request.form.get("name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    country_code = request.form.get("country_code")
+    function = request.form.get("function")
+    discipline = request.form.get("discipline")
+    event = request.form.get("event")
+
+    if coach_id:
+        conn = get_db_connection()
+        conn.execute("""
+            UPDATE coaches
+            SET name = ?, short_name = ?, gender = ?, birth_date = ?, country_code = ?, function = ?, discipline = ?, event = ?
+            WHERE coach_id = ?
+        """, (name, short_name, gender, birth_date, country_code, function, discipline, event, coach_id))
+        conn.commit()
+        conn.close()
+        return {"message": "Coach updated successfully"}, 200
+    else:
+        return {"error": "Coach ID is required"}, 400
+
+
+@app.route("/delete_coach/<int:coach_id>", methods=["POST"])
+def deleteCoach(coach_id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM coaches WHERE coach_id = ?", (coach_id,))
+    conn.commit()
+    conn.close()
+
+    return {"message": "Coach deleted successfully"}, 200
+
+
+@app.route("/edit_coach/<int:coach_id>", methods=["POST"])
+def editCoach(coach_id):
+    conn = get_db_connection()
+    query = "SELECT * FROM coaches WHERE coach_id = ?"
+    coach = conn.execute(query, (coach_id,)).fetchone()
+    conn.close()
+
+    if coach:
+        return {"coach": dict(coach)}, 200
+    else:
+        return {"error": "Coach not found"}, 404
+
+
+
 @app.route("/medals")
 def medalsPage():
     """Renders a page displaying all medals."""
