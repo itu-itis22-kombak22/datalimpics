@@ -942,26 +942,221 @@ def editCoach(coach_id):
 
 
 
-@app.route("/medals")
+@app.route("/medals", methods=["GET"])
 def medalsPage():
-    """Renders a page displaying all medals."""
-    conn = get_db_connection()
-    medals = conn.execute("""
+    """
+    Displays all medals with optional filtering, sorting, and pagination.
+    We still rely on the same approach, but the final results
+    will include the primary key 'medal_id'.
+    """
+
+    # 1. Collect query parameters (filters)
+    medal_type_filter = request.args.get('medal_type', '').strip()
+    athlete_name_filter = request.args.get('athlete_name', '').strip()
+    country_filter = request.args.get('country', '').strip()
+    discipline_filter = request.args.get('discipline', '').strip()
+
+    # 2. Handle pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    # 3. Handle sorting
+    valid_columns = ['medal_id', 'medal_type', 'medal_date', 'athlete_name', 'athlete_sex', 'country', 'discipline']
+    sort_by = request.args.get('sort_by', 'medal_id')
+    if sort_by not in valid_columns:
+        sort_by = 'medal_id'
+
+    order = request.args.get('order', 'asc').lower()
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+    # 4. Base query
+    base_query = """
         SELECT 
-            medal_type, 
-            medal_code, 
-            medal_date, 
-            athlete_name, 
-            athlete_sex, 
-            country_code, 
-            discipline_code, 
-            event, 
-            country, 
-            discipline
+            medal_id,
+            medal_type,
+            medal_date,
+            athlete_name,
+            athlete_sex,
+            country,
+            country_code,
+            discipline,
+            discipline_code,
+            event
         FROM medals
-    """).fetchall()
+        WHERE 1=1
+    """
+    params = []
+
+    # 5. Filters
+    if medal_type_filter:
+        base_query += " AND medal_type LIKE ?"
+        params.append(f"%{medal_type_filter}%")
+    if athlete_name_filter:
+        base_query += " AND athlete_name LIKE ?"
+        params.append(f"%{athlete_name_filter}%")
+    if country_filter:
+        base_query += " AND country LIKE ?"
+        params.append(f"%{country_filter}%")
+    if discipline_filter:
+        base_query += " AND discipline LIKE ?"
+        params.append(f"%{discipline_filter}%")
+
+    # 6. Count total
+    count_query = f"SELECT COUNT(*) AS total_count FROM ({base_query})"
+    conn = get_db_connection()
+    total_count = conn.execute(count_query, params).fetchone()[0]
+
+    # 7. Add sorting + pagination
+    final_query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
+    params.extend([per_page, offset])
+
+    medals = conn.execute(final_query, params).fetchall()
     conn.close()
-    return render_template('medals.html', medals=medals)
+
+    # 8. Calculate total pages
+    total_pages = (total_count + per_page - 1) // per_page
+
+    return render_template(
+        'medals.html',
+        medals=medals,
+        medal_type_filter=medal_type_filter,
+        athlete_name_filter=athlete_name_filter,
+        country_filter=country_filter,
+        discipline_filter=discipline_filter,
+        current_page=page,
+        total_pages=total_pages,
+        sort_by=sort_by,
+        order=order
+    )
+
+
+@app.route("/add_medal", methods=["POST"])
+def addMedal():
+    """
+    CREATE a new medal using 'medal_id' as the primary key (auto-increment).
+    """
+    medal_type = request.form.get("medal_type", "").strip()
+    medal_date = request.form.get("medal_date", "").strip()
+    athlete_name = request.form.get("athlete_name", "").strip()
+    athlete_sex = request.form.get("athlete_sex", "").strip()
+    country = request.form.get("country", "").strip()
+    country_code = request.form.get("country_code", "").strip()
+    discipline = request.form.get("discipline", "").strip()
+    discipline_code = request.form.get("discipline_code", "").strip()
+    event = request.form.get("event", "").strip()
+
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO medals (
+            medal_type,
+            medal_date,
+            athlete_name,
+            athlete_sex,
+            country,
+            country_code,
+            discipline,
+            discipline_code,
+            event
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (medal_type, medal_date, athlete_name, athlete_sex, country,
+          country_code, discipline, discipline_code, event))
+    conn.commit()
+    conn.close()
+    return {"message": "Medal added successfully"}, 201
+
+
+@app.route("/get_medal/<int:medal_id>", methods=["GET"])
+def getMedal(medal_id):
+    """
+    READ a single medal by its medal_id (primary key).
+    """
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            medal_id,
+            medal_type,
+            medal_date,
+            athlete_name,
+            athlete_sex,
+            country,
+            country_code,
+            discipline,
+            discipline_code,
+            event
+        FROM medals
+        WHERE medal_id = ?
+    """
+    medal = conn.execute(query, (medal_id,)).fetchone()
+    conn.close()
+
+    if not medal:
+        return {"error": "Medal not found"}, 404
+
+    # Convert the Row to a dict so you can return as JSON
+    return dict(medal), 200
+
+
+@app.route("/update_medal", methods=["POST"])
+def updateMedal():
+    """
+    UPDATE an existing medal by medal_id.
+    """
+    medal_id = request.form.get("medal_id", type=int)
+    medal_type = request.form.get("medal_type", "").strip()
+    medal_date = request.form.get("medal_date", "").strip()
+    athlete_name = request.form.get("athlete_name", "").strip()
+    athlete_sex = request.form.get("athlete_sex", "").strip()
+    country = request.form.get("country", "").strip()
+    country_code = request.form.get("country_code", "").strip()
+    discipline = request.form.get("discipline", "").strip()
+    discipline_code = request.form.get("discipline_code", "").strip()
+    event = request.form.get("event", "").strip()
+
+    conn = get_db_connection()
+    existing = conn.execute("SELECT 1 FROM medals WHERE medal_id = ?", (medal_id,)).fetchone()
+    if not existing:
+        conn.close()
+        return {"error": "Medal not found"}, 404
+
+    conn.execute("""
+        UPDATE medals
+        SET
+            medal_type = ?,
+            medal_date = ?,
+            athlete_name = ?,
+            athlete_sex = ?,
+            country = ?,
+            country_code = ?,
+            discipline = ?,
+            discipline_code = ?,
+            event = ?
+        WHERE medal_id = ?
+    """, (medal_type, medal_date, athlete_name, athlete_sex, country,
+          country_code, discipline, discipline_code, event, medal_id))
+    conn.commit()
+    conn.close()
+    return {"message": "Medal updated successfully"}, 200
+
+
+@app.route("/delete_medal/<int:medal_id>", methods=["POST"])
+def deleteMedal(medal_id):
+    """
+    DELETE a medal by its medal_id.
+    This ensures we only remove the correct row.
+    """
+    conn = get_db_connection()
+    existing = conn.execute("SELECT 1 FROM medals WHERE medal_id = ?", (medal_id,)).fetchone()
+    if not existing:
+        conn.close()
+        return {"message": f"No medal found with ID '{medal_id}'"}, 404
+
+    conn.execute("DELETE FROM medals WHERE medal_id = ?", (medal_id,))
+    conn.commit()
+    conn.close()
+    return {"message": "Medal deleted successfully"}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
