@@ -143,32 +143,12 @@
                   {% endif %}
               </ul>
           </nav>
-
           </div>
+
           <div class="col-sm-4">
             <br>
-            <div class="card">
-              <div class="card-header">
-                Add New Country
-              </div>
-              <div class="card-body">
-                <form method="POST" action="/add_country">
-                  <div class="mb-3">
-                    <label for="countryCode" class="form-label
-                    ">Country Code</label>
-                    <input type="text" class="form-control" id="countryCode" name="country_code" required="" placeholder="Input country code">
-                    </div>
-                    <div class="mb-3">
-                      <label for="countryName" class="form-label ">Country Name</label>
-                        <input type="text" class="form-control" id="countryName" name="country_name" required="" placeholder="Input country name">
-                    </div>
-                    <button type="submit" class="btn btn-success">Add Country</button>
-                </form>
-                </div>
-            </div>
+              <div class="card">
 
-
-            <div class="card mt-4">
                 <div class="card-header">
                     Search Country
                 </div>
@@ -183,8 +163,29 @@
                         <div class="col-12"><a href="{{ url_for('countriesPage') }}" class="btn btn-secondary">Clear Filters</a></div>
                       </form>
                 </div>
-            </div>
-                    
+              </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        Add New Country
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/add_country">
+                            <div class="mb-3">
+                                <label for="countryCode" class="form-label
+                                ">Country Code</label>
+                                <input type="text" class="form-control" id="countryCode" name="country_code" required="" placeholder="Input country code">
+                            </div>
+                                <div class="mb-3">
+                                    <label for="countryName" class="form-label ">Country Name</label>
+                                        <input type="text" class="form-control" id="countryName" name="country_name" required="" placeholder="Input country name">
+                                </div>
+                            <button type="submit" class="btn btn-success">Add Country</button>
+                        </form>
+                    </div>
+                </div>
+
+
           </div>
         </div>
       </div>    

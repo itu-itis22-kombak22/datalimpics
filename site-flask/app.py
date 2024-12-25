@@ -728,10 +728,10 @@ def searchMedalsTotal():
 
 @app.route("/athletes")
 def athletesPage():
-    """Renders a paginated and filtered page displaying athletes."""
+    """Renders a paginated, filtered, and sortable page displaying athletes."""
     conn = get_db_connection()
 
-    #getting query parameters
+    # Getting query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of athletes per page
     offset = (page - 1) * per_page
@@ -743,7 +743,21 @@ def athletesPage():
     min_height = request.args.get('min_height', None, type=float)
     max_height = request.args.get('max_height', None, type=float)
 
-    #base query
+    # Sorting parameters
+    sort_by = request.args.get('sort_by', 'name')  # Default sort by name
+    order = request.args.get('order', 'asc')  # Default order ascending
+
+    # Ensure valid sorting column and order
+    valid_columns = [
+        'name', 'short_name', 'gender', 'birth_date', 'birth_country',
+        'country', 'country_code', 'discipline_code', 'height_mft'
+    ]
+    if sort_by not in valid_columns:
+        sort_by = 'name'
+    if order not in ['asc', 'desc']:
+        order = 'asc'
+
+    # Base query
     base_query = """
         SELECT 
             a.name, 
@@ -760,7 +774,7 @@ def athletesPage():
     filters = []
     params = []
 
-    #appling filters
+    # Applying filters
     if filter_name:
         filters.append("a.name LIKE ?")
         params.append(f"%{filter_name}%")
@@ -783,18 +797,18 @@ def athletesPage():
         filters.append("a.height_mft <= ?")
         params.append(max_height)
 
-    #combining filters into query
+    # Combining filters into query
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    #pagination
-    paginated_query = base_query + " LIMIT ? OFFSET ?"
+    # Adding sorting and pagination
+    paginated_query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
-    #fetch  data
+    # Fetch data
     athletes = conn.execute(paginated_query, params).fetchall()
 
-    #count total athletes for pagination
+    # Count total athletes for pagination
     count_query = "SELECT COUNT(*) FROM athletes a"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
@@ -802,7 +816,7 @@ def athletesPage():
 
     conn.close()
 
-    #calculate total pages
+    # Calculate total pages
     total_pages = (total_athletes + per_page - 1) // per_page
 
     return render_template(
@@ -817,6 +831,8 @@ def athletesPage():
         current_discipline_code=discipline_code,
         current_min_height=min_height,
         current_max_height=max_height,
+        sort_by=sort_by,
+        order=order,
     )
 
 
