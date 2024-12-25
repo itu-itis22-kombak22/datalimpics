@@ -1,6 +1,6 @@
 from create_database import init_sqlite_db
 from insert_datas import insert_db_datas
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 import sqlite3
 app = Flask(__name__)
 from flask import Flask, render_template, request
@@ -725,6 +725,7 @@ def searchMedalsTotal():
         search_query=search_term
     )
 
+
 @app.route("/athletes")
 def athletesPage():
     """Renders a paginated and filtered page displaying athletes."""
@@ -734,8 +735,13 @@ def athletesPage():
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of athletes per page
     offset = (page - 1) * per_page
-    filter_name = request.args.get('filter', '').strip()  # Get name filter, trim whitespace
-    gender = request.args.get('gender', '').strip()  # Get gender filter
+    filter_name = request.args.get('filter', '').strip()
+    gender = request.args.get('gender', '').strip()
+    birth_country = request.args.get('birth_country', '').strip()
+    country = request.args.get('country', '').strip()
+    discipline_code = request.args.get('discipline_code', '').strip()
+    min_height = request.args.get('min_height', None, type=float)
+    max_height = request.args.get('max_height', None, type=float)
 
     # Base query
     base_query = """
@@ -754,36 +760,51 @@ def athletesPage():
     filters = []
     params = []
 
-    #filter
+    # Apply filters
     if filter_name:
         filters.append("a.name LIKE ?")
         params.append(f"%{filter_name}%")
     if gender:
         filters.append("a.gender = ?")
         params.append(gender)
+    if birth_country:
+        filters.append("a.birth_country LIKE ?")
+        params.append(f"%{birth_country}%")
+    if country:
+        filters.append("a.country LIKE ?")
+        params.append(f"%{country}%")
+    if discipline_code:
+        filters.append("a.discipline_code = ?")
+        params.append(discipline_code)
+    if min_height:
+        filters.append("a.height_mft >= ?")
+        params.append(min_height)
+    if max_height:
+        filters.append("a.height_mft <= ?")
+        params.append(max_height)
 
-    #filters into query
+    # Combine filters into query
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    #pagination from my old work code
-    paginated_query = base_query + "LIMIT ? OFFSET?"
+    # Add pagination
+    paginated_query = base_query + " LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
     # Fetch athletes data
     athletes = conn.execute(paginated_query, params).fetchall()
 
     # Count total athletes for pagination
-    # 03.12.2024 - The counting function was causing an error because of a syntax in line "conn.execute" I fixed it. -Yigit Alp
     count_query = "SELECT COUNT(*) FROM athletes a"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
+    # Notice we reuse params[:-2] because the last two are limit & offset
     total_athletes = conn.execute(count_query, params[:-2]).fetchone()[0]
 
     conn.close()
 
     # Calculate total pages
-    total_pages =(total_athletes + per_page- 1)//per_page
+    total_pages = (total_athletes + per_page - 1) // per_page
 
     return render_template(
         'athletes.html',
@@ -791,11 +812,140 @@ def athletesPage():
         current_page=page,
         total_pages=total_pages,
         current_filter=filter_name,
-        current_gender=gender
+        current_gender=gender,
+        current_birth_country=birth_country,
+        current_country=country,
+        current_discipline_code=discipline_code,
+        current_min_height=min_height,
+        current_max_height=max_height,
     )
 
 
+@app.route("/get_athlete", methods=["GET"])
+def getAthlete():
+    """Fetch athlete details by name and birth_date for editing."""
+    name = request.args.get("name")
+    birth_date = request.args.get("birth_date")
 
+    if not name or not birth_date:
+        return {"error": "Name and birth date are required."}, 400
+
+    conn = get_db_connection()
+    athlete = conn.execute(
+        "SELECT * FROM athletes WHERE name = ? AND birth_date = ?",
+        (name, birth_date)
+    ).fetchone()
+    conn.close()
+
+    if athlete:
+        return jsonify(dict(athlete)), 200
+    else:
+        return {"error": "Athlete not found."}, 404
+
+
+@app.route("/add_athlete", methods=["POST"])
+def addAthlete():
+    """Adds a new athlete."""
+    # Get form data
+    name = request.form.get("name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_date = request.form.get("birth_date")
+    birth_country = request.form.get("birth_country")
+    country = request.form.get("country")
+    country_code = request.form.get("country_code")
+    discipline_code = request.form.get("discipline_code")
+    height_mft = request.form.get("height_mft")
+
+    # Insert into database
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO athletes (name, short_name, gender, birth_date, 
+                              birth_country, country, country_code, 
+                              discipline_code, height_mft)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (name, short_name, gender, birth_date, 
+          birth_country, country, country_code, discipline_code, height_mft))
+    conn.commit()
+    conn.close()
+    return {"message": "Athlete added successfully"}, 201
+
+
+@app.route("/delete_athlete", methods=["POST"])
+def deleteAthlete():
+    """Deletes an athlete by name and birth date."""
+    name = request.form.get("name")
+    birth_date = request.form.get("birth_date")
+
+    if not name or not birth_date:
+        return {"error": "Name and birth date are required"}, 400
+
+    conn = get_db_connection()
+    try:
+        # Execute delete query
+        result = conn.execute(
+            "DELETE FROM athletes WHERE name = ? AND birth_date = ?",
+            (name, birth_date)
+        )
+        conn.commit()
+
+        if result.rowcount == 0:
+            return {"message": "No athlete found with the given name and birth date"}, 404
+
+        return {"message": "Athlete deleted successfully"}, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+    finally:
+        conn.close()
+
+
+@app.route("/update_athlete", methods=["POST"])
+def updateAthlete():
+    """Update an athlete's data using name and birth date as identifiers."""
+    # Get data from the form
+    name = request.form.get("name")
+    birth_date = request.form.get("birth_date")  # old birth_date
+    new_name = request.form.get("new_name")
+    short_name = request.form.get("short_name")
+    gender = request.form.get("gender")
+    birth_country = request.form.get("birth_country")
+    country = request.form.get("country")
+    country_code = request.form.get("country_code")
+    discipline_code = request.form.get("discipline_code")
+    height_mft = request.form.get("height_mft")
+
+    if not name or not birth_date:
+        return {"error": "Name and birth date are required to identify the athlete"}, 400
+
+    conn = get_db_connection()
+    try:
+        result = conn.execute("""
+            UPDATE athletes
+            SET name = ?, 
+                short_name = ?, 
+                gender = ?, 
+                birth_country = ?, 
+                country = ?, 
+                country_code = ?, 
+                discipline_code = ?, 
+                height_mft = ?
+            WHERE name = ? 
+              AND birth_date = ?
+        """, (
+            new_name, short_name, gender, birth_country,
+            country, country_code, discipline_code, height_mft,
+            name, birth_date
+        ))
+        conn.commit()
+
+        if result.rowcount == 0:
+            return {"error": "No athlete found with the given name and birth date"}, 404
+
+        return {"message": "Athlete updated successfully"}, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+    finally:
+        conn.close()
 @app.route("/coaches", methods=["GET"])
 def coachesPage():
     conn = get_db_connection()
