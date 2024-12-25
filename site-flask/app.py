@@ -815,6 +815,14 @@ def coachesPage():
     if order not in ['asc', 'desc']:
         order = 'asc'
 
+    # Filters
+    gender = request.args.get('gender', '').strip()
+    birth_date = request.args.get('birth_date', '').strip()
+    country_code = request.args.get('country_code', '').strip()
+    function = request.args.get('function', '').strip()
+    discipline = request.args.get('discipline', '').strip()
+    event = request.args.get('event', '').strip()
+
     # Base query with optional filtering
     base_query = "SELECT * FROM coaches"
     filters = []
@@ -823,6 +831,24 @@ def coachesPage():
     if search:
         filters.append("name LIKE ?")
         params.append(f"%{search}%")
+    if gender:
+        filters.append("gender = ?")
+        params.append(gender)
+    if birth_date:
+        filters.append("birth_date = ?")
+        params.append(birth_date)
+    if country_code:
+        filters.append("country_code LIKE ?")
+        params.append(f"%{country_code}%")
+    if function:
+        filters.append("function LIKE ?")
+        params.append(f"%{function}%")
+    if discipline:
+        filters.append("discipline LIKE ?")
+        params.append(f"%{discipline}%")
+    if event:
+        filters.append("event LIKE ?")
+        params.append(f"%{event}%")
 
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
@@ -844,6 +870,13 @@ def coachesPage():
     # Calculate total pages
     total_pages = (total_coaches + per_page - 1) // per_page
 
+    # Dropdown options for filters
+    gender_options = {
+        "all_selected": "" if not gender else "selected",
+        "male_selected": "selected" if gender == "Male" else "",
+        "female_selected": "selected" if gender == "Female" else "",
+    }
+
     return render_template(
         'coaches.html',
         coaches=coaches,
@@ -851,7 +884,13 @@ def coachesPage():
         total_pages=total_pages,
         search_query=search,
         sort_by=sort_by,
-        order=order
+        order=order,
+        gender_options=gender_options,
+        current_birth_date=birth_date,
+        current_country=country_code,
+        current_function=function,
+        current_discipline=discipline,
+        current_event=event
     )
 
 
