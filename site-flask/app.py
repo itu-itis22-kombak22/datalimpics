@@ -731,7 +731,7 @@ def athletesPage():
     """Renders a paginated and filtered page displaying athletes."""
     conn = get_db_connection()
 
-    # Get query parameters
+    #getting query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of athletes per page
     offset = (page - 1) * per_page
@@ -743,7 +743,7 @@ def athletesPage():
     min_height = request.args.get('min_height', None, type=float)
     max_height = request.args.get('max_height', None, type=float)
 
-    # Base query
+    #base query
     base_query = """
         SELECT 
             a.name, 
@@ -760,7 +760,7 @@ def athletesPage():
     filters = []
     params = []
 
-    # Apply filters
+    #appling filters
     if filter_name:
         filters.append("a.name LIKE ?")
         params.append(f"%{filter_name}%")
@@ -783,27 +783,26 @@ def athletesPage():
         filters.append("a.height_mft <= ?")
         params.append(max_height)
 
-    # Combine filters into query
+    #combining filters into query
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    # Add pagination
+    #pagination
     paginated_query = base_query + " LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
-    # Fetch athletes data
+    #fetch  data
     athletes = conn.execute(paginated_query, params).fetchall()
 
-    # Count total athletes for pagination
+    #count total athletes for pagination
     count_query = "SELECT COUNT(*) FROM athletes a"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
-    # Notice we reuse params[:-2] because the last two are limit & offset
     total_athletes = conn.execute(count_query, params[:-2]).fetchone()[0]
 
     conn.close()
 
-    # Calculate total pages
+    #calculate total pages
     total_pages = (total_athletes + per_page - 1) // per_page
 
     return render_template(
@@ -846,7 +845,7 @@ def getAthlete():
 @app.route("/add_athlete", methods=["POST"])
 def addAthlete():
     """Adds a new athlete."""
-    # Get form data
+    
     name = request.form.get("name")
     short_name = request.form.get("short_name")
     gender = request.form.get("gender")
@@ -857,7 +856,7 @@ def addAthlete():
     discipline_code = request.form.get("discipline_code")
     height_mft = request.form.get("height_mft")
 
-    # Insert into database
+    #insertion into database part
     conn = get_db_connection()
     conn.execute("""
         INSERT INTO athletes (name, short_name, gender, birth_date, 
@@ -882,7 +881,7 @@ def deleteAthlete():
 
     conn = get_db_connection()
     try:
-        # Execute delete query
+        #execute delete query
         result = conn.execute(
             "DELETE FROM athletes WHERE name = ? AND birth_date = ?",
             (name, birth_date)
@@ -902,9 +901,9 @@ def deleteAthlete():
 @app.route("/update_athlete", methods=["POST"])
 def updateAthlete():
     """Update an athlete's data using name and birth date as identifiers."""
-    # Get data from the form
+    #get data from the form
     name = request.form.get("name")
-    birth_date = request.form.get("birth_date")  # old birth_date
+    birth_date = request.form.get("birth_date") 
     new_name = request.form.get("new_name")
     short_name = request.form.get("short_name")
     gender = request.form.get("gender")
@@ -950,7 +949,7 @@ def updateAthlete():
 def coachesPage():
     conn = get_db_connection()
 
-    # Get query parameters
+    #get query parameters
     page = request.args.get('page', 1, type=int)
     per_page = 10  # Number of coaches per page
     offset = (page - 1) * per_page
