@@ -103,159 +103,165 @@
             </div>
         </form>
 
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>
-                            <a href="?sort_by=name&order={{ 'asc' if sort_by != 'name' or order == 'desc' else 'desc' }}">Name</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=short_name&order={{ 'asc' if sort_by != 'short_name' or order == 'desc' else 'desc' }}">Short Name</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=gender&order={{ 'asc' if sort_by != 'gender' or order == 'desc' else 'desc' }}">Gender</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=birth_date&order={{ 'asc' if sort_by != 'birth_date' or order == 'desc' else 'desc' }}">Birth Date</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=birth_country&order={{ 'asc' if sort_by != 'birth_country' or order == 'desc' else 'desc' }}">Birth Country</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=country&order={{ 'asc' if sort_by != 'country' or order == 'desc' else 'desc' }}">Country</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country Code</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=discipline_code&order={{ 'asc' if sort_by != 'discipline_code' or order == 'desc' else 'desc' }}">Discipline Code</a>
-                        </th>
-                        <th>
-                            <a href="?sort_by=height_mft&order={{ 'asc' if sort_by != 'height_mft' or order == 'desc' else 'desc' }}">Height</a>
-                        </th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for athlete in athletes %}
-                    <tr>
-                        <td>{{ athlete.name }}</td>
-                        <td>{{ athlete.short_name }}</td>
-                        <td>{{ athlete.gender }}</td>
-                        <td>{{ athlete.birth_date }}</td>
-                        <td>{{ athlete.birth_country or 'N/A' }}</td>
-                        <td>{{ athlete.country or 'N/A' }}</td>
-                        <td>{{ athlete.country_code or 'N/A' }}</td>
-                        <td>{{ athlete.discipline_code or 'N/A' }}</td>
-                        <td>{{ athlete.height_mft or 'N/A' }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button 
-                                    class="btn btn-primary btn-sm edit-button"
-                                    data-name="{{ athlete.name }}"
-                                    data-birth-date="{{ athlete.birth_date }}"
-                                >
-                                    Edit
-                                </button>
-                                
-                                <!-- Delete Form -->
-                                <form method="POST" class="deleteAthleteForm" style="display: inline;">
-                                    <input type="hidden" name="name" value="{{ athlete.name }}">
-                                    <input type="hidden" name="birth_date" value="{{ athlete.birth_date }}">
-                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                </form>
-                            </div>
-                         </td>
-                     </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="row">
+        <div class="col-sm-8">
+                <br>
+                <h4> Athletes Table </h4>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                <a href="?sort_by=name&order={{ 'asc' if sort_by != 'name' or order == 'desc' else 'desc' }}">Name</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=short_name&order={{ 'asc' if sort_by != 'short_name' or order == 'desc' else 'desc' }}">Short Name</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=gender&order={{ 'asc' if sort_by != 'gender' or order == 'desc' else 'desc' }}">Gender</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=birth_date&order={{ 'asc' if sort_by != 'birth_date' or order == 'desc' else 'desc' }}">Birth Date</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=birth_country&order={{ 'asc' if sort_by != 'birth_country' or order == 'desc' else 'desc' }}">Birth Country</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=country&order={{ 'asc' if sort_by != 'country' or order == 'desc' else 'desc' }}">Country</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country Code</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=discipline_code&order={{ 'asc' if sort_by != 'discipline_code' or order == 'desc' else 'desc' }}">Discipline Code</a>
+                            </th>
+                            <th>
+                                <a href="?sort_by=height_mft&order={{ 'asc' if sort_by != 'height_mft' or order == 'desc' else 'desc' }}">Height</a>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for athlete in athletes %}
+                        <tr>
+                            <td>{{ athlete.name }}</td>
+                            <td>{{ athlete.short_name }}</td>
+                            <td>{{ athlete.gender }}</td>
+                            <td>{{ athlete.birth_date }}</td>
+                            <td>{{ athlete.birth_country or 'N/A' }}</td>
+                            <td>{{ athlete.country or 'N/A' }}</td>
+                            <td>{{ athlete.country_code or 'N/A' }}</td>
+                            <td>{{ athlete.discipline_code or 'N/A' }}</td>
+                            <td>{{ athlete.height_mft or 'N/A' }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button
+                                        class="btn btn-primary btn-sm edit-button"
+                                        data-name="{{ athlete.name }}"
+                                        data-birth-date="{{ athlete.birth_date }}"
+                                    >
+                                        Edit
+                                    </button>
 
-
-        <!-- Pagination Controls -->
-<!-- Pagination Controls -->
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        {% if current_page > 1 %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ current_page - 1 }}&sort_by={{ sort_by }}&order={{ order }}">Previous</a>
-        </li>
-        {% endif %}
-        <li class="page-item">
-            <form method="get" action="" class="d-flex align-items-center">
-                <input type="hidden" name="sort_by" value="{{ sort_by }}">
-                <input type="hidden" name="order" value="{{ order }}">
-                <input
-                    type="number"
-                    name="page"
-                    class="form-control mx-2"
-                    style="width: 80px;"
-                    min="1"
-                    max="{{ total_pages }}"
-                    value="{{ current_page }}"
-                >
-                <button type="submit" class="btn btn-primary">Go</button>
-            </form>
-        </li>
-        {% if current_page < total_pages %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ current_page + 1 }}&sort_by={{ sort_by }}&order={{ order }}">Next</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-
-        <!-- Add Athlete Form -->
-        <div class="card mt-4">
-            <div class="card-header">
-                Add New Athlete
+                                    <!-- Delete Form -->
+                                    <form method="POST" class="deleteAthleteForm" style="display: inline;">
+                                        <input type="hidden" name="name" value="{{ athlete.name }}">
+                                        <input type="hidden" name="birth_date" value="{{ athlete.birth_date }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                             </td>
+                         </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <form method="POST" action="/add_athlete" id="add-athlete-form">
-                    <div class="mb-3">
-                        <label for="athleteName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="athleteName" name="name" required>
+
+
+            <!-- Pagination Controls -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if current_page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page - 1 }}&sort_by={{ sort_by }}&order={{ order }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item">
+                        <form method="get" action="" class="d-flex align-items-center">
+                            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                            <input type="hidden" name="order" value="{{ order }}">
+                            <input
+                                type="number"
+                                name="page"
+                                class="form-control mx-2"
+                                style="width: 80px;"
+                                min="1"
+                                max="{{ total_pages }}"
+                                value="{{ current_page }}"
+                            >
+                            <button type="submit" class="btn btn-primary">Go</button>
+                        </form>
+                    </li>
+                    {% if current_page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ current_page + 1 }}&sort_by={{ sort_by }}&order={{ order }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+            <!-- Add Athlete Form -->
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-header">
+                        Add New Athlete
                     </div>
-                    <div class="mb-3">
-                        <label for="athleteShortName" class="form-label">Short Name</label>
-                        <input type="text" class="form-control" id="athleteShortName" name="short_name" required>
+                    <div class="card-body">
+                        <form method="POST" action="/add_athlete" id="add-athlete-form">
+                            <div class="mb-3">
+                                <label for="athleteName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="athleteName" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteShortName" class="form-label">Short Name</label>
+                                <input type="text" class="form-control" id="athleteShortName" name="short_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteGender" class="form-label">Gender</label>
+                                <select class="form-select" id="athleteGender" name="gender" required>
+                                    <option value="">Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteBirthDate" class="form-label">Birth Date</label>
+                                <input type="date" class="form-control" id="athleteBirthDate" name="birth_date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteBirthCountry" class="form-label">Birth Country</label>
+                                <input type="text" class="form-control" id="athleteBirthCountry" name="birth_country" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteCountry" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="athleteCountry" name="country" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteCountryCode" class="form-label">Country Code</label>
+                                <input type="text" class="form-control" id="athleteCountryCode" name="country_code" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteDisciplineCode" class="form-label">Discipline Code</label>
+                                <input type="text" class="form-control" id="athleteDisciplineCode" name="discipline_code" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="athleteHeight" class="form-label">Height (m/ft)</label>
+                                <input type="number" step="0.01" class="form-control" id="athleteHeight" name="height_mft" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Athlete</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="athleteGender" class="form-label">Gender</label>
-                        <select class="form-select" id="athleteGender" name="gender" required>
-                            <option value="">Select gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteBirthDate" class="form-label">Birth Date</label>
-                        <input type="date" class="form-control" id="athleteBirthDate" name="birth_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteBirthCountry" class="form-label">Birth Country</label>
-                        <input type="text" class="form-control" id="athleteBirthCountry" name="birth_country" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteCountry" class="form-label">Country</label>
-                        <input type="text" class="form-control" id="athleteCountry" name="country" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteCountryCode" class="form-label">Country Code</label>
-                        <input type="text" class="form-control" id="athleteCountryCode" name="country_code" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteDisciplineCode" class="form-label">Discipline Code</label>
-                        <input type="text" class="form-control" id="athleteDisciplineCode" name="discipline_code" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="athleteHeight" class="form-label">Height (m/ft)</label>
-                        <input type="number" step="0.01" class="form-control" id="athleteHeight" name="height_mft" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Add Athlete</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
