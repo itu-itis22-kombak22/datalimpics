@@ -965,22 +965,22 @@ def updateAthlete():
 def coachesPage():
     conn = get_db_connection()
 
-    #get query parameters
+
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # Number of coaches per page
+    per_page = 10
     offset = (page - 1) * per_page
     search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'coach_id')  # Default sorting by ID
-    order = request.args.get('order', 'asc')  # Default order ascending
+    sort_by = request.args.get('sort_by', 'coach_id')
+    order = request.args.get('order', 'asc')
 
-    # Ensure valid sorting column and order
+
     valid_columns = ['coach_id', 'name', 'short_name', 'gender', 'birth_date', 'country_code', 'function', 'discipline', 'event']
     if sort_by not in valid_columns:
         sort_by = 'coach_id'
     if order not in ['asc', 'desc']:
         order = 'asc'
 
-    # Filters
+
     gender = request.args.get('gender', '').strip()
     birth_date = request.args.get('birth_date', '').strip()
     country_code = request.args.get('country_code', '').strip()
@@ -988,7 +988,7 @@ def coachesPage():
     discipline = request.args.get('discipline', '').strip()
     event = request.args.get('event', '').strip()
 
-    # Base query with optional filtering
+
     base_query = "SELECT * FROM coaches"
     filters = []
     params = []
@@ -1018,13 +1018,13 @@ def coachesPage():
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    # Add sorting and pagination
+
     query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
     coaches = conn.execute(query, params).fetchall()
 
-    # Count total coaches for pagination
+
     count_query = "SELECT COUNT(*) FROM coaches"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
@@ -1032,10 +1032,10 @@ def coachesPage():
 
     conn.close()
 
-    # Calculate total pages
+
     total_pages = (total_coaches + per_page - 1) // per_page
 
-    # Dropdown options for filters
+
     gender_options = {
         "all_selected": "" if not gender else "selected",
         "male_selected": "selected" if gender == "Male" else "",
