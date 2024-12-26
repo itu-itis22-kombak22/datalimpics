@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>Medals</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        .action-buttons {
+            display: flex;
+            gap: 5px; /* Adds spacing between the buttons */
+        }
+    </style>
 </head>
 <body>
 <!-- Action Status Modal (for success/error messages) -->
@@ -180,6 +186,7 @@
             <td>{{ medal.discipline }}</td>
             <td>{{ medal.event }}</td>
             <td>
+                <div class="action-buttons">
               <!-- Edit button (opens modal) uses medal_id -->
               <button class="btn btn-primary btn-sm edit-button" data-id="{{ medal.medal_id }}">
                 Edit
@@ -191,6 +198,7 @@
                   Delete
                 </button>
               </form>
+                </div>
             </td>
           </tr>
           {% endfor %}

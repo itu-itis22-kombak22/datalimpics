@@ -5,6 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Coaches</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <style>
+        .action-buttons {
+            display: flex;
+            gap: 5px; /* Adds spacing between the buttons */
+        }
+    </style>
     </head>
     <body>
 
@@ -133,8 +139,8 @@
                 <input type="date" id="birth-date-filter" name="birth_date" class="form-control" value="{{ current_birth_date }}">
             </div>
             <div class="col-md-4 col-lg-3">
-                <label for="country-filter" class="form-label">Country:</label>
-                <input type="text" id="country-filter" name="country_code" class="form-control" placeholder="Enter country" value="{{ current_country }}">
+                <label for="country-filter" class="form-label">Country Code:</label>
+                <input type="text" id="country-filter" name="country_code" class="form-control" placeholder="Enter country code" value="{{ current_country }}">
             </div>
             <div class="col-md-4 col-lg-3">
                 <label for="function-filter" class="form-label">Function:</label>
@@ -175,7 +181,7 @@
             <a href="?sort_by=birth_date&order={{ 'asc' if sort_by != 'birth_date' or order == 'desc' else 'desc' }}">Birth Date</a>
         </th>
         <th>
-            <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country</a>
+            <a href="?sort_by=country_code&order={{ 'asc' if sort_by != 'country_code' or order == 'desc' else 'desc' }}">Country Code</a>
         </th>
         <th>
             <a href="?sort_by=function&order={{ 'asc' if sort_by != 'function' or order == 'desc' else 'desc' }}">Function</a>
@@ -201,10 +207,12 @@
                         <td>{{ coach['discipline'] }}</td>
                         <td>{{ coach['event'] }}</td>
                         <td>
+                            <div class="action-buttons">
                             <button class="btn btn-primary btn-sm edit-button" data-id="{{ coach['coach_id'] }}">Edit</button>
                             <form method="POST" action="/delete_coach/{{ coach['coach_id'] }}" style="display: inline;">
                                 <button type="submit" class="btn btn-danger btn-sm delete-button" data-id="{{ coach['coach_id'] }}">Delete</button>
                             </form>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
