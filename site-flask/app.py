@@ -161,7 +161,6 @@ def disciplinesPage():
     sort_by = request.args.get('sort_by', 'discipline_id')  # Default sorting by ID
     order = request.args.get('order', 'asc')  # Default order ascending
 
-    # Ensure valid sorting column and order
     valid_columns = ['discipline_id', 'discipline_name']
     if sort_by not in valid_columns:
         sort_by = 'discipline_id'

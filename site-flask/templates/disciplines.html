@@ -205,11 +205,10 @@
 <script>
     // Handle Add Discipline
     async function handleAddDiscipline(event) {
-        event.preventDefault(); // Prevent the default form submission behavior
+        event.preventDefault();
         const formData = new FormData(event.target);
 
         try {
-            // Make the POST request to add the discipline
             const response = await fetch("/add_discipline", {
                 method: "POST",
                 body: formData,
