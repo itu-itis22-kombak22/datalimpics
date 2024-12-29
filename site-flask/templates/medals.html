@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-<!-- Action Status Modal (for success/error messages) -->
+<!-- Action Status Modal -->
 <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -21,7 +21,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="modalMessage">
-        <!-- Message will be injected here by JavaScript -->
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -80,7 +80,7 @@
       <div class="modal-body">
         <!-- Form for editing -->
         <form id="editForm">
-          <!-- hidden field for primary key (medal_id) -->
+
           <input type="hidden" id="editMedalId" name="medal_id">
 
           <div class="mb-3">
@@ -187,11 +187,11 @@
             <td>{{ medal.event }}</td>
             <td>
                 <div class="action-buttons">
-              <!-- Edit button (opens modal) uses medal_id -->
+              <!-- Edit button uses medal_id -->
               <button class="btn btn-primary btn-sm edit-button" data-id="{{ medal.medal_id }}">
                 Edit
               </button>
-              <!-- Delete button (async submit) uses medal_id -->
+              <!-- Delete button uses medal_id -->
               <form method="POST" action="/delete_medal/{{ medal.medal_id }}" style="display:inline;">
                 <button type="submit" class="btn btn-danger btn-sm"
                         onclick="return confirm('Delete this medal?');">

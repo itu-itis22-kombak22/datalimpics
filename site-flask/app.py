@@ -1153,18 +1153,18 @@ def medalsPage():
     will include the primary key 'medal_id'.
     """
 
-    # 1. Collect query parameters (filters)
+
     medal_type_filter = request.args.get('medal_type', '').strip()
     athlete_name_filter = request.args.get('athlete_name', '').strip()
     country_filter = request.args.get('country', '').strip()
     discipline_filter = request.args.get('discipline', '').strip()
 
-    # 2. Handle pagination
+
     page = request.args.get('page', 1, type=int)
     per_page = 10
     offset = (page - 1) * per_page
 
-    # 3. Handle sorting
+
     valid_columns = ['medal_id', 'medal_type', 'medal_date', 'athlete_name', 'athlete_sex', 'country', 'discipline']
     sort_by = request.args.get('sort_by', 'medal_id')
     if sort_by not in valid_columns:
@@ -1174,7 +1174,7 @@ def medalsPage():
     if order not in ['asc', 'desc']:
         order = 'asc'
 
-    # 4. Base query
+
     base_query = """
         SELECT 
             medal_id,
@@ -1192,7 +1192,7 @@ def medalsPage():
     """
     params = []
 
-    # 5. Filters
+
     if medal_type_filter:
         base_query += " AND medal_type LIKE ?"
         params.append(f"%{medal_type_filter}%")
@@ -1206,19 +1206,19 @@ def medalsPage():
         base_query += " AND discipline LIKE ?"
         params.append(f"%{discipline_filter}%")
 
-    # 6. Count total
+
     count_query = f"SELECT COUNT(*) AS total_count FROM ({base_query})"
     conn = get_db_connection()
     total_count = conn.execute(count_query, params).fetchone()[0]
 
-    # 7. Add sorting + pagination
+
     final_query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
     medals = conn.execute(final_query, params).fetchall()
     conn.close()
 
-    # 8. Calculate total pages
+
     total_pages = (total_count + per_page - 1) // per_page
 
     return render_template(
@@ -1298,7 +1298,7 @@ def getMedal(medal_id):
     if not medal:
         return {"error": "Medal not found"}, 404
 
-    # Convert the Row to a dict so you can return as JSON
+
     return dict(medal), 200
 
 
