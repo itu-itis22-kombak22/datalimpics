@@ -153,13 +153,12 @@ def disciplinesPage():
     """Renders a paginated, searchable, filterable, and sortable page displaying disciplines."""
     conn = get_db_connection()
 
-    # Get query parameters
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # Number of disciplines per page
+    per_page = 10
     offset = (page - 1) * per_page
-    discipline_name = request.args.get('discipline_name', '').strip()  # Filter by discipline name
-    sort_by = request.args.get('sort_by', 'discipline_id')  # Default sorting by ID
-    order = request.args.get('order', 'asc')  # Default order ascending
+    discipline_name = request.args.get('discipline_name', '').strip()
+    sort_by = request.args.get('sort_by', 'discipline_id')
+    order = request.args.get('order', 'asc')
 
     valid_columns = ['discipline_id', 'discipline_name']
     if sort_by not in valid_columns:
@@ -167,7 +166,6 @@ def disciplinesPage():
     if order not in ['asc', 'desc']:
         order = 'asc'
 
-    # Base query with optional filtering
     base_query = "SELECT * FROM disciplines"
     filters = []
     params = []
@@ -179,13 +177,11 @@ def disciplinesPage():
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
 
-    # Add sorting and pagination
     query = f"{base_query} ORDER BY {sort_by} {order} LIMIT ? OFFSET ?"
     params.extend([per_page, offset])
 
     disciplines = conn.execute(query, params).fetchall()
 
-    # Count total disciplines for pagination
     count_query = "SELECT COUNT(*) FROM disciplines"
     if filters:
         count_query += " WHERE " + " AND ".join(filters)
@@ -193,7 +189,6 @@ def disciplinesPage():
 
     conn.close()
 
-    # Calculate total pages
     total_pages = (total_disciplines + per_page - 1) // per_page
 
     return render_template(
@@ -258,20 +253,43 @@ def deleteDiscipline(discipline_id):
 
     return {"message": "Discipline deleted successfully"}, 200
 
+@app.route("/search_disciplines", methods=["GET"])
+def searchDisciplines():
+    """Searches for disciplines."""
+    search_term = request.args.get("search_term", "").strip()
+    conn = get_db_connection()
+    query = """
+        SELECT 
+            discipline_id, 
+            discipline_name
+        FROM disciplines
+        WHERE discipline_name LIKE ?
+    """
+    disciplines = conn.execute(query, (f"%{search_term}%",)).fetchall()
+    conn.close()
+    return render_template(
+        'disciplines.html',
+        disciplines=disciplines,
+        current_page=1,
+        total_pages=1,
+        search_query=search_term
+    )
+
+
 @app.route("/technical_officials", methods=["GET"])
 def technicalOfficialsPage():
     """Renders a paginated, searchable, filterable, and sortable page displaying technical officials."""
     conn = get_db_connection()
 
-    # Get query parameters
+    # Getting the query parameters in here
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # Number of officials per page
+    per_page = 10
     offset = (page - 1) * per_page
     search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'official_id')  # Default sorting by official_id
-    order = request.args.get('order', 'asc')  # Default order ascending
+    sort_by = request.args.get('sort_by', 'official_id')
+    order = request.args.get('order', 'asc')
 
-    # Ensure valid sorting column and order
+    # Ensuring valid sorting column and order in heree
     valid_columns = ['official_id', 'name', 'short_name', 'gender', 'birth_date', 'country', 'function', 'discipline_name']
     if sort_by not in valid_columns:
         sort_by = 'name'
@@ -435,27 +453,7 @@ def deleteTechnicalOfficial(official_id):
     conn.close()
     return {"message": "Technical official deleted successfully"}, 200
 
-@app.route("/search_disciplines", methods=["GET"])
-def searchDisciplines():
-    """Searches for disciplines."""
-    search_term = request.args.get("search_term", "").strip()
-    conn = get_db_connection()
-    query = """
-        SELECT 
-            discipline_id, 
-            discipline_name
-        FROM disciplines
-        WHERE discipline_name LIKE ?
-    """
-    disciplines = conn.execute(query, (f"%{search_term}%",)).fetchall()
-    conn.close()
-    return render_template(
-        'disciplines.html',
-        disciplines=disciplines,
-        current_page=1,
-        total_pages=1,
-        search_query=search_term
-    )
+
 
 
 @app.route("/search_technical_officials", methods=["GET"])
@@ -635,12 +633,12 @@ def addMedalsTotal():
 
     conn = get_db_connection()
 
-    # Check if the country code exists
+    # Checks if the country code exists
     country_exists = conn.execute("SELECT 1 FROM countries WHERE country_code = ?", (country_code,)).fetchone()
     if not country_exists:
         conn.close()
         return {"message": "Country code does not exist"}, 404
-    # Check if the medals total entry already exists
+    # Checks if the medals total entry already exists
     medals_total_exists = conn.execute("SELECT 1 FROM medals_total WHERE country_code = ?", (country_code,)).fetchone()
     if medals_total_exists:
         conn.close()
