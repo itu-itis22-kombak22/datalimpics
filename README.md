@@ -77,6 +77,6 @@ This project provides interactive visualizations of Tokyo 2020 Olympics data. It
 ---
 
 ## Contact
-If you have any questions or feedback, feel free to open an issue in this repository or email `ciftlikli21@itu.edu.tr`.
+If you have any questions or feedback, feel free to open an issue in this repository or email `kombak22@itu.edu.tr`.
 
 ---
